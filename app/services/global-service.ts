@@ -88,10 +88,7 @@ export default class GlobalService {
   }
 
   async APIGetAllPost(page: number) {
-    const url = `${this.api_v2.url}${this.api_v2.path}/posts?page=${page}`;
-
-    console.log("APIGetAllPost URL:", url);
-    
+    const url = `${this.api_v2.url}${this.api_v2.path}/posts?page=${page}`;    
     try {
       const res = await axios.get(url);
       return res.data;

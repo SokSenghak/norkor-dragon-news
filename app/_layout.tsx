@@ -17,7 +17,7 @@ function RootLayoutNav() {
       <Stack.Screen 
         name="article/[id]" 
         options={{ 
-          headerShown: true,
+          headerShown: false,
           title: "ព័ត៌មានលម្អិត",
           headerStyle: { backgroundColor: "#2B4A7C" },
           headerTintColor: "#FFFFFF",

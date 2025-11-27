@@ -1,8 +1,10 @@
 import { Image } from "expo-image";
-import { useLocalSearchParams } from "expo-router";
-import { Share2 } from "lucide-react-native";
+import { router, useLocalSearchParams } from "expo-router";
+import { ChevronLeft, Share2 } from "lucide-react-native";
 import React, { useEffect, useRef, useState } from "react";
+import RenderHtml from "react-native-render-html";
 import {
+  ActivityIndicator,
   Animated,
   Dimensions,
   Platform,
@@ -14,21 +16,43 @@ import {
   View,
 } from "react-native";
 
-import { adBanners, breakingNews, galleryImages, newsArticles } from "@/mocks/news";
+import GlobalService from "../services/global-service";
 
 const { width } = Dimensions.get("window");
 
-export default function ArticleDetailScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+interface Post {
+  id: number;
+  title: { rendered: string };
+  content: { rendered: string };
+  date: string;
+  extra?: { featured_image?: string };
+  gallery?: string[]; // optional array of image URLs
+  ads?: string[]; // optional array of ad URLs
+  breaking?: string[]; // optional breaking news items
+}
 
+export default function PostDetailScreen() {
+  const globalService = new GlobalService();
+  const { id } = useLocalSearchParams<{ id: string }>();
   const [marqueeText, setMarqueeText] = useState("");
   const marqueeAnim = useRef(new Animated.Value(0)).current;
-
-  const article = newsArticles.find((a) => a.id === id);
-
+  const [post, setPost] = useState<Post | null>(null);
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
-    const fullText = breakingNews.join("   •   ");
-    setMarqueeText(fullText + "   •   " + fullText);
+    async function fetchPost() {
+      setLoading(true);
+      const data = await globalService.APIGetPostByID(Number(id));
+      if (data) setPost(data);
+      setLoading(false);
+    }
+    fetchPost();
+  }, [id]);
+
+  // use post.breaking for marquee if available
+  useEffect(() => {
+    if (!post) return;
+    const breakingText = post.breaking?.join("   •   ") || "";
+    setMarqueeText(breakingText + "   •   " + breakingText);
 
     Animated.loop(
       Animated.timing(marqueeAnim, {
@@ -37,7 +61,7 @@ export default function ArticleDetailScreen() {
         useNativeDriver: true,
       })
     ).start();
-  }, [marqueeAnim]);
+  }, [marqueeAnim, post]);
 
   const translateX = marqueeAnim.interpolate({
     inputRange: [-1, 0],
@@ -45,24 +69,45 @@ export default function ArticleDetailScreen() {
   });
 
   const handleShare = async () => {
-    try {
-      if (Platform.OS === "web") {
-        alert("Share functionality");
-      } else {
-        await Share.share({
-          message: article?.title || "Share article",
-          url: "https://nkdnews.com",
-        });
-      }
-    } catch (error) {
-      console.error("Share error:", error);
-    }
-  };
+  try {
+    if (!post) return;
 
-  if (!article) {
+    const title = post?.title?.rendered;
+    const link = post?.guid?.rendered ;
+    const image = post.extra?.featured_image;
+    // Social preview will be generated from LINK metadata
+    const message = `${title}\n\nអានបន្ត៖\n${link}`;
+
+    if (Platform.OS === "web") {
+      alert("Sharing only works on mobile.");
+      return;
+    }
+
+    await Share.share({
+      title,
+      message,
+      url: link,
+    });
+
+  } catch (err) {
+    console.error("Share error:", err);
+  }
+};
+
+
+
+  if (loading) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.errorText}>Article not found</Text>
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color="#2B4A7C" />
+      </View>
+    );
+  }
+
+  if (!post) {
+    return (
+      <View style={styles.centered}>
+        <Text style={styles.errorText}>Post not found</Text>
       </View>
     );
   }
@@ -70,71 +115,61 @@ export default function ArticleDetailScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.headerButtons}>
+        <TouchableOpacity 
+          style={styles.backButton}
+          onPress={() => router.back()}
+        >
+          <ChevronLeft size={22} color="#FFFFFF" />
+          <Text style={styles.backButtonText}>ត្រឡប់ក្រោយ</Text>
+        </TouchableOpacity>
         <TouchableOpacity style={styles.shareButton} onPress={handleShare}>
           <Share2 size={20} color="#FFFFFF" />
           <Text style={styles.shareButtonText}>ចែករំលែក</Text>
         </TouchableOpacity>
       </View>
-
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        <View style={styles.marqueeContainer}>
-          <Animated.Text
-            style={[
-              styles.marqueeText,
-              { transform: [{ translateX }] },
-            ]}
-            numberOfLines={1}
-          >
-            {marqueeText}
-          </Animated.Text>
-        </View>
+        {/* Marquee */}
+        {post.breaking && post.breaking.length > 0 && (
+          <View style={styles.marqueeContainer}>
+            <Animated.Text style={[styles.marqueeText, { transform: [{ translateX }] }]} numberOfLines={1}>
+              {marqueeText}
+            </Animated.Text>
+          </View>
+        )}
 
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.galleryScroll}
-          contentContainerStyle={styles.galleryContent}
-        >
-          {galleryImages.map((img) => (
-            <TouchableOpacity key={img.id} style={styles.galleryItem}>
-              <Image source={{ uri: img.uri }} style={styles.galleryImage} />
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
+        {/* Gallery */}
+        {post.gallery && post.gallery.length > 0 && (
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.galleryScroll} contentContainerStyle={styles.galleryContent}>
+            {post.gallery.map((imgUri, index) => (
+              <TouchableOpacity key={index} style={styles.galleryItem}>
+                <Image source={{ uri: imgUri }} style={styles.galleryImage} />
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        )}
 
-        <Image
-          source={{ uri: adBanners[0].image }}
-          style={styles.adBanner}
-          contentFit="cover"
-        />
+        {/* Ads */}
+        {post.ads && post.ads.length > 0 && post.ads.map((adUri, index) => (
+          <Image key={index} source={{ uri: adUri }} style={styles.adBanner} contentFit="cover" />
+        ))}
 
+        {/* Article Content */}
         <View style={styles.articleContainer}>
-          <Image
-            source={{ uri: article.image }}
-            style={styles.articleImage}
-            contentFit="cover"
-          />
-
+          {post.extra?.featured_image && (
+            <Image source={{ uri: post.extra?.featured_image }} style={styles.articleImage} contentFit="cover" />
+          )}
           <View style={styles.articleContent}>
-            <Text style={styles.articleCategory}>{article.category}</Text>
-            <Text style={styles.articleTitle}>{article.title}</Text>
-            <Text style={styles.articleDate}>{article.date}</Text>
-            
-            <Text style={styles.articleBody}>{article.description}</Text>
-            <Text style={styles.articleBody}>
-              សាម៉ាត្រី AFP ថាម្បូរទិ ទីប៊ី ដឹងថ្មី ថ្លៃបទីធុ ចាន់ស្រ្គស្គ ក្រកម្មល្គុកមុរតើកញសារទេជាអ្ងកល្គកត្គោមខាអ្ន គ្គឃ្នស្រមុសអាលឹកដុធ្វើទេអាលកើតត្វាយចោសញុ៉កមុសទា។
-            </Text>
-            <Text style={styles.articleBody}>
-              ក្រឃោដក្រូល្គភម មានក់ នីងថ្ងគស្រូន្កូករលនវខាម មានក័ គុម ថ្លៃបទីធុ ចាន់ស្រ្គស្គ ក្រកម្មល្គុកមុរតើកញសារទេជាអ្ងកល្គកត្គោមខាអ្ន។
-            </Text>
+           <RenderHtml
+              contentWidth={width - 32}
+              source={{ html: post.content.rendered }}
+              tagsStyles={{
+                p: { fontSize: 16, lineHeight: 24, marginBottom: 12, color: "#333" },
+                img: { marginVertical: 8, borderRadius: 8 },
+                a: { color: "#2B4A7C" },
+              }}
+            />
           </View>
         </View>
-
-        <Image
-          source={{ uri: adBanners[1].image }}
-          style={styles.adBanner}
-          contentFit="cover"
-        />
 
         <View style={styles.footer} />
       </ScrollView>
@@ -143,118 +178,62 @@ export default function ArticleDetailScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#F5F5F5",
+  container: { 
+    flex: 1, 
+    backgroundColor: "#F5F5F5" 
   },
-  headerButtons: {
-    backgroundColor: "#2B4A7C",
-    flexDirection: "row",
-    justifyContent: "flex-end",
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-  },
-  shareButton: {
+  backButton: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    backgroundColor: "rgba(255,255,255,0.2)",
+    paddingHorizontal: 12,
     paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 20,
+    borderRadius: 8,
   },
-  shareButtonText: {
-    fontSize: 14,
-    fontWeight: "600",
+  backButtonText: {
     color: "#FFFFFF",
-  },
-  scrollView: {
-    flex: 1,
-  },
-  marqueeContainer: {
-    backgroundColor: "#2B4A7C",
-    paddingVertical: 10,
-    overflow: "hidden",
-  },
-  marqueeText: {
-    fontSize: 14,
-    color: "#FFFFFF",
-    fontWeight: "500",
-  },
-  galleryScroll: {
-    backgroundColor: "#FFFFFF",
-    marginVertical: 8,
-  },
-  galleryContent: {
-    paddingHorizontal: 8,
-    paddingVertical: 12,
-    gap: 8,
-  },
-  galleryItem: {
-    marginRight: 8,
-  },
-  galleryImage: {
-    width: 180,
-    height: 120,
-    borderRadius: 8,
-  },
-  adBanner: {
-    width: width - 16,
-    height: 80,
-    marginHorizontal: 8,
-    marginVertical: 8,
-    borderRadius: 8,
-  },
-  articleContainer: {
-    backgroundColor: "#FFFFFF",
-    marginHorizontal: 8,
-    marginVertical: 8,
-    borderRadius: 8,
-    overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  articleImage: {
-    width: "100%",
-    height: 250,
-  },
-  articleContent: {
-    padding: 16,
-  },
-  articleCategory: {
-    fontSize: 12,
-    color: "#2B4A7C",
-    fontWeight: "600",
-    marginBottom: 8,
-  },
-  articleTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#1A1A1A",
-    marginBottom: 8,
-    lineHeight: 28,
-  },
-  articleDate: {
-    fontSize: 12,
-    color: "#999999",
-    marginBottom: 16,
-  },
-  articleBody: {
     fontSize: 15,
-    color: "#333333",
-    lineHeight: 24,
-    marginBottom: 16,
+    fontWeight: "600",
   },
-  errorText: {
-    fontSize: 16,
-    color: "#999999",
-    textAlign: "center",
-    marginTop: 40,
+  centered: { 
+    flex: 1, 
+    justifyContent: "center", 
+    alignItems: "center" 
   },
-  footer: {
-    height: 20,
+  headerButtons: {
+    paddingTop: Platform.OS === "ios" ? 50 : 20,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: "#2B4A7C",
+    alignItems: "center",
   },
+  shareButton: {
+    flexDirection: "row", 
+    alignItems: "center", 
+    gap: 6, 
+    backgroundColor: "rgba(255,255,255,0.2)", 
+    paddingVertical: 8, 
+    paddingHorizontal: 16, 
+    borderRadius: 20 
+  },
+  shareButtonText: { fontSize: 14, fontWeight: "600", color: "#FFFFFF" },
+  scrollView: { flex: 1 },
+  marqueeContainer: { backgroundColor: "#2B4A7C", paddingVertical: 10, overflow: "hidden" },
+  marqueeText: { fontSize: 14, color: "#FFFFFF", fontWeight: "500" },
+  galleryScroll: { backgroundColor: "#FFFFFF", marginVertical: 8 },
+  galleryContent: { paddingHorizontal: 8, paddingVertical: 12, gap: 8 },
+  galleryItem: { marginRight: 8 },
+  galleryImage: { width: 180, height: 120, borderRadius: 8 },
+  adBanner: { width: Dimensions.get("window").width - 16, height: 80, marginHorizontal: 8, marginVertical: 8, borderRadius: 8 },
+  articleContainer: { backgroundColor: "#FFFFFF", marginHorizontal: 8, marginVertical: 8, borderRadius: 8, overflow: "hidden", shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 3 },
+  articleImage: { width: "100%", height: 250 },
+  articleContent: { padding: 16 },
+  articleTitle: { fontSize: 20, fontWeight: "700", color: "#1A1A1A", marginBottom: 8, lineHeight: 28 },
+  articleDate: { fontSize: 12, color: "#999999", marginBottom: 16 },
+  articleBody: { fontSize: 15, color: "#333333", lineHeight: 24, marginBottom: 16 },
+  errorText: { fontSize: 16, color: "#999999", textAlign: "center", marginTop: 40 },
+  footer: { height: 20 },
 });

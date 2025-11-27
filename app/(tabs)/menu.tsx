@@ -1,30 +1,33 @@
 import { Image } from "expo-image";
 import { Stack, useRouter } from "expo-router";
-
-import {
-  Book,
-  DollarSign,
-  Facebook,
-  FileText,
-  Globe,
-  Home,
-  Newspaper,
-  Phone,
-  Radio,
-} from "lucide-react-native";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import * as Font from "expo-font";
+
+import logo from "../../assets/images/icon.png";
+import homeImg from "../../assets/images/home.png";
+import about from "../../assets/images/about.png";
+import domestic from "../../assets/images/domestic.png";
+import international from "../../assets/images/international.png";
+import real_estate from "../../assets/images/real-estate.png";
+import sport from "../../assets/images/sport.png";
+import book_story from "../../assets/images/book-story.png";
+import social_network from "../../assets/images/social-network.png";
+import emergency_number from "../../assets/images/emergency-number.png";
+import ads from "../../assets/images/ads.png";
 
 interface MenuItem {
-  id: string;
+  id: number | string | null;
+  url: string;
   title: string;
-  icon: React.ReactNode;
+  icons: any; // can be ReactNode or require(image)
   action: () => void;
 }
 
 export default function MenuScreen() {
   const router = useRouter();
+  const [fontsLoaded, setFontsLoaded] = useState(false);
 
   const handleShare = () => {
     Alert.alert("ចែករំលែក", "មុខងារចែករំលែកនឹងត្រូវបានបង្កើតឡើង");
@@ -35,95 +38,60 @@ export default function MenuScreen() {
   };
 
   const menuItems: MenuItem[] = [
-    {
-      id: "home",
-      title: "ដើមដោយ",
-      icon: <Home size={24} color="#2B4A7C" />,
-      action: () => router.push("/(tabs)")
-    },
-    {
-      id: "national",
-      title: "ព័ត៌មានជាតិ",
-      icon: <Newspaper size={24} color="#2B4A7C" />,
-      action: () => Alert.alert("ព័ត៌មានជាតិ", "មុខងារនេះនឹងត្រូវបានបង្កើតឡើង")
-    },
-    {
-      id: "international",
-      title: "ព័ត៌មានអន្តរជាតិ",
-      icon: <Globe size={24} color="#2B4A7C" />,
-      action: () => Alert.alert("ព័ត៌មានអន្តរជាតិ", "មុខងារនេះនឹងត្រូវបានបង្កើតឡើង")
-    },
-    {
-      id: "economy",
-      title: "អចលនទ្រព្យ",
-      icon: <DollarSign size={24} color="#2B4A7C" />,
-      action: () => Alert.alert("អចលនទ្រព្យ", "មុខងារនេះនឹងត្រូវបានបង្កើតឡើង")
-    },
-    {
-      id: "world",
-      title: "សំឡេង: ពិភព កម្ពុជា",
-      icon: <Radio size={24} color="#2B4A7C" />,
-      action: () => Alert.alert("សំឡេង", "មុខងារនេះនឹងត្រូវបានបង្កើតឡើង")
-    },
-    {
-      id: "terms",
-      title: "ទំនួលខុសត្រូវ & ប្រមូលផ្តុំស្រេចនុត",
-      icon: <FileText size={24} color="#2B4A7C" />,
-      action: () => Alert.alert("លក្ខខណ្ឌ", "មុខងារនេះនឹងត្រូវបានបង្កើតឡើង")
-    },
-    {
-      id: "facebook",
-      title: "ចូលរួមលើហ្វេសប៊ុក",
-      icon: <Facebook size={24} color="#2B4A7C" />,
-      action: handleShare
-    },
-    {
-      id: "contact",
-      title: "ចេញនូវគ្នានឹងអនុញ្ញាត",
-      icon: <Phone size={24} color="#2B4A7C" />,
-      action: handleContact
-    },
-    {
-      id: "ads",
-      title: "ឌិគាំទិនចេញកុយកាសាយ៍ពន្ធ",
-      icon: <Book size={24} color="#2B4A7C" />,
-      action: () => Alert.alert("ការផ្សាយពាណិជ្ជកម្ម", "សម្រាប់ការផ្សាយពាណិជ្ជកម្ម សូមទំនាក់ទំនង: 012 46 56 92")
-    },
-    {
-      id: "about",
-      title: "អំពី (សើក នារ ព្រះខ័ន)",
-      icon: <Newspaper size={24} color="#2B4A7C" />,
-      action: () => Alert.alert("អំពី", "Nokor Dragon Breaking National News & International News")
-    },
+    { title: 'ទំព័រដើម', url: '/', id: "home", icons: homeImg, action: () => router.push('/') },
+    { title: 'ព័ត៌មានជាតិ', url: '/list/66', id: "66", icons: domestic, action: () => router.push('/list/66') },
+    { title: 'ព័ត៌មានអន្តរជាតិ', url: '/list/8', id: "8", icons: international, action: () => router.push('/list/8') },
+    { title: 'អចលនទ្រព', url: '/list/19', id: "19", icons: real_estate, action: () => router.push('/list/19') },
+    { title: 'សិល្បៈ កីឡា ការងារ', url: '/list/67_15', id: "67,15", icons: sport, action: () => router.push('/list/67_15') },
+    { title: 'រឿងព្រេងនិទាន & ប្រវត្ដិសាស្រ្ដខ្មែរ', url: '/list/71', id: "71", icons: book_story, action: () => router.push('/list/71') },
+    { title: 'បណ្តាញសង្គម', url: '/page/5724', id: "5724", icons: social_network, action: handleShare },
+    { title: 'លេខសង្រ្គោះបន្ទាន់', url: '/page/38051', id: "38051", icons: emergency_number, action: handleContact },
+    { title: 'ទំនាក់ទំនងផ្សាយពាណិជ្ជកម្ម', url: '/page/7427', id: "7427", icons: ads, action: () => router.push('/page/7427') },
+    { title: 'អំពី យើង (នគរ ដ្រេហ្គន)', url: '/page/412314', id: "412314", icons: about, action: () => router.push('/page/412314') },
   ];
+
+  useEffect(() => {
+    async function init() {
+      await Font.loadAsync({
+        KhmerOS: require("../../assets/fonts/KhmerOS_muollight.ttf"),
+      });
+      setFontsLoaded(true);
+    }
+    init();
+  }, []);
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
       <Stack.Screen options={{ headerShown: false }} />
-      
+
       <View style={styles.header}>
-        <Image
-          source={{ uri: "https://images.unsplash.com/photo-1679678691006-0ad24fecb769?w=100" }}
-          style={styles.logo}
-          contentFit="contain"
-        />
-        <Text style={styles.headerTitle}>ព័ត៌មាន នាគ ព្រះខ័ន</Text>
+        <Image source={logo} style={styles.logo} contentFit="contain" />
+        {fontsLoaded ? (
+          <Text style={[styles.headerTitle, { fontFamily: "KhmerOS" }]}>
+            ព័ត៌មាន នាគ ព្រះខ័ន
+          </Text>
+        ) : null}
       </View>
 
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         {menuItems.map((item) => (
           <TouchableOpacity
-            key={item.id}
+            key={item.id?.toString()}
             style={styles.menuItem}
             onPress={item.action}
           >
             <View style={styles.iconContainer}>
-              {item.icon}
+              {typeof item.icons === "number" ? (
+                <Image source={item.icons} style={{ width: 24, height: 24 }} />
+              ) : (
+                item.icons
+              )}
             </View>
-            <Text style={styles.menuText}>{item.title}</Text>
+            {fontsLoaded ? (
+              <Text style={[styles.menuText, { fontFamily: "KhmerOS" }]}>{item.title}</Text>
+            ): null}
           </TouchableOpacity>
         ))}
-
         <View style={styles.footer} />
       </ScrollView>
     </SafeAreaView>
@@ -131,62 +99,24 @@ export default function MenuScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#2B4A7C",
-  },
-  header: {
-    backgroundColor: "#2B4A7C",
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    gap: 12,
-  },
-  logo: {
-    width: 40,
-    height: 40,
-    borderRadius: 8,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#FFFFFF",
-  },
-  scrollView: {
-    flex: 1,
-  },
-  menuItem: {
-    backgroundColor: "#2B4A7C",
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    marginHorizontal: 8,
-    marginVertical: 4,
-    borderRadius: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
-    gap: 16,
-  },
-  iconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: "#F0F4F8",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  menuText: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#1A1A1A",
-    flex: 1,
-  },
-  footer: {
-    height: 20,
-  },
+  container: { flex: 1, backgroundColor: "#2B4A7C" },
+  header: { backgroundColor: "#2B4A7C", flexDirection: "row", alignItems: "center", paddingHorizontal: 16, paddingVertical: 12, gap: 12 },
+  logo: { width: 40, height: 40, borderRadius: 8 },
+  headerTitle: { fontSize: 18, fontWeight: "700", color: "#FFFFFF" },
+  scrollView: { flex: 1 },
+  menuItem: { 
+    backgroundColor: "#2B4A7C", 
+    flexDirection: "row", 
+    alignItems: "center", 
+    paddingHorizontal: 6, 
+    paddingVertical: 6, 
+    marginHorizontal: 8, 
+    marginVertical: 4, 
+    borderRadius: 12, 
+    shadowColor: "#000", 
+    shadowOffset: { 
+      width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 2, elevation: 1, gap: 16 },
+  iconContainer: { width: 48, height: 48, borderRadius: 24, backgroundColor: "#F0F4F8", justifyContent: "center", alignItems: "center" },
+  menuText: { fontSize: 15, fontWeight: "600", color: "#FFFFFF", flex: 1 },
+  footer: { height: 20 },
 });
