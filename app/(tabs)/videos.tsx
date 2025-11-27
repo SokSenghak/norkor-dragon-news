@@ -1,9 +1,9 @@
 import { Image } from "expo-image";
 import { Stack } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Dimensions,
-  ScrollView,
+  FlatList,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -11,219 +11,141 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import YoutubePlayer from "react-native-youtube-iframe";
-import { MoreVertical } from "lucide-react-native";
-
-import { videos } from "@/mocks/news";
+import GlobalService from "../services/global-service";
 
 const { width } = Dimensions.get("window");
 
-
-
 export default function VideosScreen() {
-  const [currentVideoId, setCurrentVideoId] = useState(videos[0]?.youtubeId || "");
-  const [playing, setPlaying] = useState(true);
+  const globalService = new GlobalService();
 
-  const handleVideoSelect = (youtubeId: string) => {
-    console.log("Selected video ID:", youtubeId);
-    setCurrentVideoId(youtubeId);
+  const [allVideo, setAllVideo] = useState<any[]>([]);
+  const [currentVideoId, setCurrentVideoId] = useState<string>("");
+  const [playing, setPlaying] = useState(true);
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+
+  // Fetch videos function
+  const fetchVideos = async (pageNumber: number) => {
+    if (loading || !hasMore) return;
+    setLoading(true);
+
+    const videoData = await globalService.listAllVideo(10, pageNumber);
+    if (videoData?.datas?.length > 0) {
+      setAllVideo((prev) => [...prev, ...videoData.datas]);
+      // If first page, set first video
+      if (pageNumber === 1) {
+        setCurrentVideoId(videoData.datas[0].videoId);
+      }
+    } else {
+      setHasMore(false); // No more data
+    }
+
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchVideos(1);
+  }, []);
+
+  const handleVideoSelect = (videoId: string) => {
+    setCurrentVideoId(videoId);
     setPlaying(true);
   };
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
       <Stack.Screen options={{ headerShown: false }} />
-      
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        <View style={styles.playerContainer}>
-          <YoutubePlayer
-            height={220}
-            width={width}
-            play={playing}
-            videoId={currentVideoId}
-            onChangeState={(state: string) => {
-              console.log("Player state:", state);
-              if (state === "ended") {
-                setPlaying(false);
-              }
-            }}
-          />
-        </View>
 
-        <View style={styles.playlistHeader}>
-          <View style={styles.playlistIcon}>
-            <Text style={styles.playlistIconText}>🎵</Text>
-          </View>
-          <View style={styles.playlistInfo}>
-            <Text style={styles.playlistTitle}>Mix - និស្សនេហៈសុំឱ្យឈ្មោះក្នុងកម្មវិធី នីក ...</Text>
-            <Text style={styles.playlistSubtitle}>Mixes are playlists YouTube makes for you</Text>
-          </View>
-          <TouchableOpacity style={styles.closeButton}>
-            <Text style={styles.closeButtonText}>✕</Text>
-          </TouchableOpacity>
-        </View>
-
-        {videos.map((video) => (
+      <YoutubePlayer
+        height={220}
+        width={width}
+        play={playing}
+        videoId={currentVideoId}
+        onChangeState={(state: string) => {
+          if (state === "ended") setPlaying(false);
+        }}
+      />
+      <FlatList
+        data={allVideo}
+        keyExtractor={(item, index) => `${item._id}-${index}`} // unique key
+        contentContainerStyle={{ paddingBottom: 40 }}
+        renderItem={({ item }) => (
           <TouchableOpacity
-            key={video.id}
             style={styles.videoItem}
-            onPress={() => handleVideoSelect(video.youtubeId)}
+            onPress={() => handleVideoSelect(item.videoId)}
           >
-            <View style={styles.dragHandle}>
-              <View style={styles.dragLine} />
-              <View style={styles.dragLine} />
-              <View style={styles.dragLine} />
-            </View>
+            <View style={styles.dragHandle}></View>
             <View style={styles.thumbnailContainer}>
               <Image
-                source={{ uri: video.thumbnail }}
+                source={{ uri: item.thumbnails_high }}
                 style={styles.thumbnail}
                 contentFit="cover"
               />
-              <View style={styles.durationBadge}>
-                <Text style={styles.durationText}>5:02</Text>
-              </View>
             </View>
             <View style={styles.videoInfo}>
               <Text style={styles.videoTitle} numberOfLines={2}>
-                {video.title}
+                {item.title}
               </Text>
-              <Text style={styles.channelName}>Watching Hub</Text>
-              <Text style={styles.videoStats}>2.6M views • 7 years ago</Text>
+              <Text style={styles.videoStats}>
+                {new Date(item.publishedAt).toLocaleDateString()}
+              </Text>
             </View>
-            <TouchableOpacity style={styles.menuButton}>
-              <MoreVertical size={20} color="#FFFFFF" />
-            </TouchableOpacity>
           </TouchableOpacity>
-        ))}
-
-        <View style={styles.footer} />
-      </ScrollView>
+        )}
+        onEndReached={() => {
+          if (!loading && hasMore) {
+            setPage((prev) => {
+              const nextPage = prev + 1;
+              fetchVideos(nextPage);
+              return nextPage;
+            });
+          }
+        }}
+        onEndReachedThreshold={0.5}
+      />
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#000000",
-  },
-  scrollView: {
-    flex: 1,
-  },
-  playerContainer: {
-    width: width,
-    height: 220,
-    backgroundColor: "#1A1A1A",
-  },
-  playlistHeader: {
-    backgroundColor: "#0F0F0F",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    flexDirection: "row",
-    alignItems: "center",
-    borderBottomWidth: 1,
-    borderBottomColor: "#2A2A2A",
-  },
-  playlistIcon: {
-    width: 24,
-    height: 24,
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 12,
-  },
-  playlistIconText: {
-    fontSize: 16,
-  },
-  playlistInfo: {
-    flex: 1,
-  },
-  playlistTitle: {
-    fontSize: 14,
-    fontWeight: "600" as const,
-    color: "#FFFFFF",
-    marginBottom: 2,
-  },
-  playlistSubtitle: {
-    fontSize: 12,
-    color: "#AAAAAA",
-  },
-  closeButton: {
-    padding: 8,
-  },
-  closeButtonText: {
-    fontSize: 20,
-    color: "#FFFFFF",
-  },
+  container: { flex: 1, backgroundColor: "#2B4A7C" },
   videoItem: {
     flexDirection: "row",
     paddingVertical: 8,
     paddingHorizontal: 12,
     alignItems: "flex-start",
-    backgroundColor: "#000000",
+    backgroundColor: "#2B4A7C",
   },
-  dragHandle: {
-    justifyContent: "center",
-    paddingRight: 12,
-    paddingTop: 35,
-  },
-  dragLine: {
-    width: 12,
-    height: 2,
-    backgroundColor: "#666666",
-    marginVertical: 1,
-  },
+  dragHandle: { justifyContent: "center", paddingTop: 35 },
   thumbnailContainer: {
     position: "relative",
-    width: 168,
-    height: 94,
+    width: 148,
+    height: 74,
     borderRadius: 8,
     overflow: "hidden",
     backgroundColor: "#1A1A1A",
   },
-  thumbnail: {
-    width: "100%",
-    height: "100%",
-  },
+  thumbnail: { width: "100%", height: "100%" },
   durationBadge: {
     position: "absolute",
     bottom: 4,
     right: 4,
-    backgroundColor: "rgba(0, 0, 0, 0.8)",
+    backgroundColor: "rgba(0,0,0,0.8)",
     paddingHorizontal: 4,
     paddingVertical: 2,
     borderRadius: 2,
   },
-  durationText: {
-    fontSize: 11,
-    fontWeight: "600" as const,
-    color: "#FFFFFF",
-  },
-  videoInfo: {
-    flex: 1,
-    paddingLeft: 12,
-    paddingRight: 8,
-  },
+  durationText: { fontSize: 11, fontWeight: "600", color: "#FFFFFF" },
+  videoInfo: { flex: 1, paddingLeft: 12, paddingRight: 8 },
   videoTitle: {
     fontSize: 14,
-    fontWeight: "500" as const,
+    fontWeight: "500",
     color: "#FFFFFF",
     lineHeight: 20,
     marginBottom: 4,
   },
-  channelName: {
-    fontSize: 12,
-    color: "#AAAAAA",
-    marginBottom: 2,
-  },
-  videoStats: {
-    fontSize: 12,
-    color: "#AAAAAA",
-  },
-  menuButton: {
-    padding: 8,
-    justifyContent: "center",
-  },
-  footer: {
-    height: 40,
-  },
+  channelName: { fontSize: 12, color: "#AAAAAA", marginBottom: 2 },
+  videoStats: { fontSize: 12, color: "#AAAAAA" },
+  menuButton: { padding: 8, justifyContent: "center" },
 });

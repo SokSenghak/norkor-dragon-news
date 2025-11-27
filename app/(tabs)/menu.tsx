@@ -133,7 +133,7 @@ export default function MenuScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F5F5F5",
+    backgroundColor: "#2B4A7C",
   },
   header: {
     backgroundColor: "#2B4A7C",
@@ -157,7 +157,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   menuItem: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#2B4A7C",
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,
