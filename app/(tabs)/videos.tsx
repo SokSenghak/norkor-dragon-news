@@ -21,19 +21,15 @@ export default function VideosScreen() {
   const router = useRouter();
   const globalService = new GlobalService();
   const nkd = new NkdNewsService(globalService);
-
   const [allVideo, setAllVideo] = useState<any[]>([]);
   const [currentVideoId, setCurrentVideoId] = useState<string>("");
   const [playing, setPlaying] = useState(true);
-
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
-
   const scrollViewRef = useRef<ScrollView>(null);
   const [adsImages, setAdsImages] = useState<string[]>([]);
 
-  // Load ADS
   const loadAds = async () => {
     const res = await nkd.getAdsByID({ page_id: 885629 });
     if (res?.content?.rendered) {
@@ -54,38 +50,29 @@ export default function VideosScreen() {
     loadAds();
   }, []);
 
-  // Auto Scroll Ads
   useEffect(() => {
     if (adsImages.length === 0) return;
-
     let scrollX = 0;
     const autoScroll = setInterval(() => {
       scrollX += 1;
       scrollViewRef.current?.scrollTo({ x: scrollX, animated: false });
-
       if (scrollX > adsImages.length * 200) scrollX = 0;
     }, 20);
-
     return () => clearInterval(autoScroll);
   }, [adsImages]);
 
-  // Fetch Videos
   const fetchVideos = async (pageNumber: number) => {
     if (loading || !hasMore) return;
-
     setLoading(true);
     const videoData = await globalService.listAllVideo(10, pageNumber);
-
     if (videoData?.datas?.length > 0) {
       setAllVideo((prev) => [...prev, ...videoData.datas]);
-
       if (pageNumber === 1) {
         setCurrentVideoId(videoData.datas[0].videoId);
       }
     } else {
       setHasMore(false);
     }
-
     setLoading(false);
   };
 
@@ -98,10 +85,8 @@ export default function VideosScreen() {
     setPlaying(true);
   };
 
-  // Inject ads into list
   const renderVideoItem = ({ item, index }: any) => (
     <View>
-      {/* Inject ads every 3 items */}
       {index % 3 === 2 && adsImages.length > 0 && (
         <TouchableOpacity
           onPress={() => router.push("/videos")}
@@ -115,7 +100,6 @@ export default function VideosScreen() {
         </TouchableOpacity>
       )}
 
-      {/* Video Item */}
       <TouchableOpacity
         style={styles.videoItem}
         onPress={() => handleVideoSelect(item.videoId)}
@@ -140,19 +124,15 @@ export default function VideosScreen() {
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
       <Stack.Screen options={{ headerShown: false }} />
-
-      {/* Main Video Player */}
       <YoutubePlayer
         height={220}
         width={width}
         play={playing}
         videoId={currentVideoId}
-        onChangeState={(state) => {
+        onChangeState={(state: string) => {
           if (state === "ended") setPlaying(false);
         }}
       />
-
-      {/* Auto Scroll Ads Row */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -166,8 +146,6 @@ export default function VideosScreen() {
           </TouchableOpacity>
         ))}
       </ScrollView>
-
-      {/* Video List */}
       <FlatList
         data={allVideo}
         renderItem={renderVideoItem}
@@ -188,8 +166,6 @@ export default function VideosScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#2B4A7C" },
-
-  // Ads Auto-scroll Row
   galleryScroll: { marginVertical: 4 },
   galleryImage: {
     width: 180,
@@ -198,14 +174,12 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
 
-  // List Injected Ad
   adBanner: {
     width: width - 20,
     height: 70,
     borderRadius: 10,
   },
 
-  // Video Item
   videoItem: {
     flexDirection: "row",
     backgroundColor: "#fff",

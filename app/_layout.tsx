@@ -12,7 +12,7 @@ const queryClient = new QueryClient();
 
 function RootLayoutNav() {
   return (
-    <Stack screenOptions={{ headerBackTitle: "មុន" }}>
+    <Stack screenOptions={{ headerBackTitle: "ត្រឡប" }}>
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen 
         name="article/[id]" 

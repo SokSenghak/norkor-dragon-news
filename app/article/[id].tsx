@@ -17,10 +17,12 @@ import {
 } from "react-native";
 
 import GlobalService from "../services/global-service";
+import NkdNewsService from "../services/nkdNewsService";
 
 const { width } = Dimensions.get("window");
 
 interface Post {
+  guid: any;
   id: number;
   title: { rendered: string };
   content: { rendered: string };
@@ -35,9 +37,38 @@ export default function PostDetailScreen() {
   const globalService = new GlobalService();
   const { id } = useLocalSearchParams<{ id: string }>();
   const [marqueeText, setMarqueeText] = useState("");
-  const marqueeAnim = useRef(new Animated.Value(0)).current;
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
+  const nkd = new NkdNewsService(globalService);
+  const [adsImages, setAdsImages] = useState<string[]>([]);
+  const marqueeAnim = useRef(new Animated.Value(0)).current;
+  const [textWidth, setTextWidth] = useState(0);
+  const [containerWidth, setContainerWidth] = useState(width);
+  const scrollViewRef = useRef(null);
+  const [fullList, setFullList] = useState([]);
+  
+  const loadAds = async () => {
+    const res = await nkd.getAdsByID({ page_id: 885629 });
+    if (res?.content?.rendered) {
+      const imgs = extractAdImages(res.content.rendered);
+      setAdsImages(imgs);
+    }
+  };
+  
+  const extractAdImages = (html: string) => {
+    const regex = /<img[^>]+src="([^">]+)"/g;
+    const images: string[] = [];
+    let match;
+    while ((match = regex.exec(html)) !== null) {
+      images.push(match[1]);
+    }
+    return images;
+  };
+
+  useEffect(() => {
+    loadAds();
+  }, []);
+  
   useEffect(() => {
     async function fetchPost() {
       setLoading(true);
@@ -50,18 +81,18 @@ export default function PostDetailScreen() {
 
   // use post.breaking for marquee if available
   useEffect(() => {
-    if (!post) return;
-    const breakingText = post.breaking?.join("   •   ") || "";
-    setMarqueeText(breakingText + "   •   " + breakingText);
-
+    if (!post || textWidth === 0) return;
+    const text = "នគរដ្រេហ្គន​ ព័ត៌មានជាតិ-អន្តរជាតិទាន់ហេតុការណ៍ សម្បូរបែប ប្រកបដោយក្រមសីលធម៍ និងវិជ្ជាជីវៈដោយផ្ទាល់";
+    setMarqueeText(text);
+    marqueeAnim.setValue(containerWidth);
     Animated.loop(
       Animated.timing(marqueeAnim, {
-        toValue: -1,
-        duration: 30000,
+        toValue: -textWidth,
+        duration: textWidth * 25, // speed auto depends on text length
         useNativeDriver: true,
       })
     ).start();
-  }, [marqueeAnim, post]);
+  }, [post, textWidth]);
 
   const translateX = marqueeAnim.interpolate({
     inputRange: [-1, 0],
@@ -69,32 +100,49 @@ export default function PostDetailScreen() {
   });
 
   const handleShare = async () => {
-  try {
-    if (!post) return;
+    try {
+      if (!post) return;
 
-    const title = post?.title?.rendered;
-    const link = post?.guid?.rendered ;
-    const image = post.extra?.featured_image;
-    // Social preview will be generated from LINK metadata
-    const message = `${title}\n\nអានបន្ត៖\n${link}`;
+      const title = post?.title?.rendered;
+      const link = post?.guid?.rendered ;
+      const image = post.extra?.featured_image;
+      // Social preview will be generated from LINK metadata
+      const message = `${title}\n\nអានបន្ត៖\n${link}`;
 
-    if (Platform.OS === "web") {
-      alert("Sharing only works on mobile.");
-      return;
+      if (Platform.OS === "web") {
+        alert("Sharing only works on mobile.");
+        return;
+      }
+
+      await Share.share({
+        title,
+        message,
+        url: link,
+      });
+
+    } catch (err) {
+      console.error("Share error:", err);
     }
+  };
 
-    await Share.share({
-      title,
-      message,
-      url: link,
-    });
+  useEffect(() => {
+    setFullList([...adsImages, ...adsImages]);
+  }, [adsImages]);
 
-  } catch (err) {
-    console.error("Share error:", err);
-  }
-};
-
-
+  useEffect(() => {
+    let position = 0;
+    const interval = setInterval(() => {
+      position += 1;
+      scrollViewRef.current?.scrollTo({
+        x: position,
+        animated: false,
+      });
+      if (position > adsImages.length * 150) {
+        position = 0;
+      }
+    }, 10);
+    return () => clearInterval(interval);
+  }, [adsImages]);
 
   if (loading) {
     return (
@@ -127,33 +175,39 @@ export default function PostDetailScreen() {
           <Text style={styles.shareButtonText}>ចែករំលែក</Text>
         </TouchableOpacity>
       </View>
+      
+      <View
+        style={styles.marqueeContainerAds}
+        onLayout={(e) => setContainerWidth(e.nativeEvent.layout.width)}
+      >
+        <Animated.Text
+          onLayout={(e) => setTextWidth(e.nativeEvent.layout.width)}
+          style={[
+            styles.marqueeText, { fontFamily: "KhmerOS",
+            transform: [{ translateX: marqueeAnim }] },
+          ]}
+          numberOfLines={1}
+        >
+          {marqueeText}
+        </Animated.Text>
+        <ScrollView
+          ref={scrollViewRef}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          scrollEnabled={false}
+          contentContainerStyle={{ alignItems: "center" }}
+        >
+          {fullList.map((uri, index) => (
+            <TouchableOpacity key={index} style={{ marginRight: 10 }}>
+              <Image
+                source={{ uri }}
+                style={{ width: 190, height: 80, borderRadius: 10 }}
+              />
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        {/* Marquee */}
-        {post.breaking && post.breaking.length > 0 && (
-          <View style={styles.marqueeContainer}>
-            <Animated.Text style={[styles.marqueeText, { transform: [{ translateX }] }]} numberOfLines={1}>
-              {marqueeText}
-            </Animated.Text>
-          </View>
-        )}
-
-        {/* Gallery */}
-        {post.gallery && post.gallery.length > 0 && (
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.galleryScroll} contentContainerStyle={styles.galleryContent}>
-            {post.gallery.map((imgUri, index) => (
-              <TouchableOpacity key={index} style={styles.galleryItem}>
-                <Image source={{ uri: imgUri }} style={styles.galleryImage} />
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        )}
-
-        {/* Ads */}
-        {post.ads && post.ads.length > 0 && post.ads.map((adUri, index) => (
-          <Image key={index} source={{ uri: adUri }} style={styles.adBanner} contentFit="cover" />
-        ))}
-
-        {/* Article Content */}
         <View style={styles.articleContainer}>
           {post.extra?.featured_image && (
             <Image source={{ uri: post.extra?.featured_image }} style={styles.articleImage} contentFit="cover" />
@@ -170,7 +224,6 @@ export default function PostDetailScreen() {
             />
           </View>
         </View>
-
         <View style={styles.footer} />
       </ScrollView>
     </View>
@@ -180,7 +233,14 @@ export default function PostDetailScreen() {
 const styles = StyleSheet.create({
   container: { 
     flex: 1, 
-    backgroundColor: "#F5F5F5" 
+    backgroundColor: "#2B4A7C" 
+  },
+  galleryContentads: { 
+    paddingHorizontal: 2, 
+    paddingVertical: 4,  
+  },
+  marqueeContainerAds: { 
+    backgroundColor: "#2B4A7C",
   },
   backButton: {
     flexDirection: "row",
@@ -223,12 +283,25 @@ const styles = StyleSheet.create({
   scrollView: { flex: 1 },
   marqueeContainer: { backgroundColor: "#2B4A7C", paddingVertical: 10, overflow: "hidden" },
   marqueeText: { fontSize: 14, color: "#FFFFFF", fontWeight: "500" },
-  galleryScroll: { backgroundColor: "#FFFFFF", marginVertical: 8 },
   galleryContent: { paddingHorizontal: 8, paddingVertical: 12, gap: 8 },
   galleryItem: { marginRight: 8 },
-  galleryImage: { width: 180, height: 120, borderRadius: 8 },
+  galleryImage: { width: 180, height: 80, borderRadius: 8 },
   adBanner: { width: Dimensions.get("window").width - 16, height: 80, marginHorizontal: 8, marginVertical: 8, borderRadius: 8 },
-  articleContainer: { backgroundColor: "#FFFFFF", marginHorizontal: 8, marginVertical: 8, borderRadius: 8, overflow: "hidden", shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 4, elevation: 3 },
+  articleContainer: { 
+    backgroundColor: "#FFFFFF", 
+    marginHorizontal: 8, 
+    marginVertical: 8, 
+    borderRadius: 8, 
+    overflow: "hidden", 
+    shadowColor: "#000", 
+    shadowOffset: { 
+      width: 0, 
+      height: 2 
+    }, 
+    shadowOpacity: 0.1, 
+    shadowRadius: 4, 
+    elevation: 3 
+  },
   articleImage: { width: "100%", height: 250 },
   articleContent: { padding: 16 },
   articleTitle: { fontSize: 20, fontWeight: "700", color: "#1A1A1A", marginBottom: 8, lineHeight: 28 },

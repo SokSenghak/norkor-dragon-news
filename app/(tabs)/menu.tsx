@@ -46,8 +46,8 @@ export default function MenuScreen() {
     { title: 'រឿងព្រេងនិទាន & ប្រវត្ដិសាស្រ្ដខ្មែរ', url: '/list/71', id: "71", icons: book_story, action: () => router.push('/list/71') },
     { title: 'បណ្តាញសង្គម', url: '/page/5724', id: "5724", icons: social_network, action: handleShare },
     { title: 'លេខសង្រ្គោះបន្ទាន់', url: '/page/38051', id: "38051", icons: emergency_number, action: handleContact },
-    { title: 'ទំនាក់ទំនងផ្សាយពាណិជ្ជកម្ម', url: '/page/7427', id: "7427", icons: ads, action: () => router.push('/page/7427') },
-    { title: 'អំពី យើង (នគរ ដ្រេហ្គន)', url: '/page/412314', id: "412314", icons: about, action: () => router.push('/page/412314') },
+    { title: 'ទំនាក់ទំនងផ្សាយពាណិជ្ជកម្ម', url: '/page/7427', id: "7427", icons: ads, action: () => router.push('/list/7427') },
+    { title: 'អំពី យើង (នគរ ដ្រេហ្គន)', url: '/page/412314', id: "412314", icons: about, action: () => router.push('/list/412314') },
   ];
 
   useEffect(() => {
@@ -68,7 +68,7 @@ export default function MenuScreen() {
         <Image source={logo} style={styles.logo} contentFit="contain" />
         {fontsLoaded ? (
           <Text style={[styles.headerTitle, { fontFamily: "KhmerOS" }]}>
-            ព័ត៌មាន នាគ ព្រះខ័ន
+            ព័ត៌មាន នគរដ្រេហ្គន​
           </Text>
         ) : null}
       </View>

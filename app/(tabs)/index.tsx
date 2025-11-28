@@ -27,30 +27,22 @@ const { width } = Dimensions.get("window");
 
 export default function HomeScreen() {
   const router = useRouter();
-
-  const [marqueeText, setMarqueeText] = useState("");
+  const [marqueeText, setMarqueeText] = useState();
   const marqueeAnim = useRef(new Animated.Value(0)).current;
-
   const [playing, setPlaying] = useState(true);
   const [fontsLoaded, setFontsLoaded] = useState(false);
-
-  // NEWS + PAGINATION
   const [newsArticles, setNewsArticles] = useState<any[]>([]);
   const [page, setPage] = useState(1);
   const [refreshing, setRefreshing] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
-
   const scrollViewRef = useRef<ScrollView>(null);
-
   const globalService = new GlobalService();
   const nkd = new NkdNewsService(globalService);
-
   const [lastVideo, setLastVideo] = useState<any>(null);
-
-  // ADS GALLERY
   const [adsImages, setAdsImages] = useState<string[]>([]);
+  const [fullList, setFullList] = useState([]);
+  const [textWidth, setTextWidth] = useState(0);
 
-  // LOAD ADS
   const loadAds = async () => {
     const res = await nkd.getAdsByID({ page_id: 885629 });
     if (res?.content?.rendered) {
@@ -63,33 +55,16 @@ export default function HomeScreen() {
     const regex = /<img[^>]+src="([^">]+)"/g;
     const images: string[] = [];
     let match;
-
     while ((match = regex.exec(html)) !== null) {
       images.push(match[1]);
     }
-
     return images;
   };
 
-  // GALLERY AUTO SCROLL
   useEffect(() => {
     loadAds();
   }, []);
 
-  useEffect(() => {
-    let scrollValue = 0;
-    let scroller: any;
-
-    const scroll = () => {
-      scrollValue += 1;
-      scrollViewRef.current?.scrollTo({ x: scrollValue, animated: false });
-    };
-
-    scroller = setInterval(scroll, 20);
-    return () => clearInterval(scroller);
-  }, []);
-
-  // LOAD VIDEO
   useEffect(() => {
     async function fetchLastVideo() {
       const video = await globalService.getLastVideo();
@@ -98,7 +73,6 @@ export default function HomeScreen() {
     fetchLastVideo();
   }, []);
 
-  // LOAD FONTS + FIRST PAGE NEWS
   useEffect(() => {
     async function init() {
       await Font.loadAsync({
@@ -111,60 +85,67 @@ export default function HomeScreen() {
     init();
   }, []);
 
-  // MARQUEE
   useEffect(() => {
     if (!fontsLoaded) return;
+    const txt = "នគរដ្រេហ្គន​ ព័ត៌មានជាតិ-អន្តរជាតិទាន់ហេតុការណ៍ សម្បូរបែប ប្រកបដោយក្រមសីលធម៍ និងវិជ្ជាជីវៈដោយផ្ទាល់";
+    setMarqueeText(txt);
+    marqueeAnim.setValue(width);
+    if (textWidth > 0) {
+      Animated.loop(
+        Animated.timing(marqueeAnim, {
+          toValue: -textWidth,
+          duration: textWidth * 35, // speed
+          useNativeDriver: true,
+        })
+      ).start();
+    }
+    
+  }, [fontsLoaded, textWidth]);
 
-    const fullText = breakingNews.join("   •   ");
-    setMarqueeText(fullText + "   •   " + fullText);
-
-    Animated.loop(
-      Animated.timing(marqueeAnim, {
-        toValue: -1,
-        duration: 30000,
-        useNativeDriver: true,
-      })
-    ).start();
-  }, [fontsLoaded]);
-
-  const translateX = marqueeAnim.interpolate({
-    inputRange: [-1, 0],
-    outputRange: [-width * 2, 0],
-  });
-
-  // 🔥 REUSABLE LOAD FUNCTION
   const loadPosts = async (pageNumber: number) => {
     try {
       const res = await nkd.getAll({ per_page: 10, page: pageNumber });
-
       if (pageNumber === 1) {
         setNewsArticles(res.data.data);
       } else {
         setNewsArticles((prev) => [...prev, ...res.data.data]);
       }
-
       setPage(pageNumber);
     } catch (err) {
       console.log("Load error:", err);
     }
   };
 
-  // 🔥 PULL TO REFRESH
   const onRefresh = async () => {
     setRefreshing(true);
     await loadPosts(1);
     setRefreshing(false);
   };
 
-  // 🔥 LOAD MORE (INFINITE SCROLL)
   const loadMore = async () => {
     if (loadingMore) return;
     setLoadingMore(true);
     await loadPosts(page + 1);
     setLoadingMore(false);
   };
+  useEffect(() => {
+      setFullList([...adsImages, ...adsImages]);
+    }, [adsImages]);
 
-  // Loading until fonts ready
+    useEffect(() => {
+      let position = 0;
+      const interval = setInterval(() => {
+        position += 1;
+        scrollViewRef.current?.scrollTo({
+          x: position,
+          animated: false,
+        });
+        if (position > adsImages.length * 150) {
+          position = 0;
+        }
+      }, 10);
+      return () => clearInterval(interval);
+    }, [adsImages]);
   if (!fontsLoaded) {
     return (
       <SafeAreaView style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
@@ -173,17 +154,8 @@ export default function HomeScreen() {
     );
   }
 
-  // 🔥 RENDER EACH ARTICLE
   const renderArticle = ({ item: article, index }: any) => (
     <View key={article.id}>
-      {index === 1 && adBanners[0] && (
-        <Image
-          source={{ uri: adBanners[0].image }}
-          style={styles.adBanner}
-          contentFit="cover"
-        />
-      )}
-
       <TouchableOpacity
         style={styles.newsCard}
         onPress={() =>
@@ -210,7 +182,6 @@ export default function HomeScreen() {
         </View>
       </TouchableOpacity>
 
-      {/* Inject ads every 3 posts */}
       {index % 3 === 2 && adsImages[index % adsImages.length] && (
         <Image
           source={{ uri: adsImages[index % adsImages.length] }}
@@ -222,16 +193,11 @@ export default function HomeScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Stack.Screen options={{ headerShown: false }} />
-
-      {/* Header */}
+    <View style={styles.container}>
       <View style={styles.header}>
         <Image source={logo} style={styles.logo} contentFit="contain" />
         <Text style={styles.headerTitle}>ព័ត៌មាន នគរដ្រេហ្គន​</Text>
       </View>
-
-      {/* Video */}
       {lastVideo?.datas && (
         <View style={{ width, height: 220 }}>
           <YoutubePlayer
@@ -239,7 +205,7 @@ export default function HomeScreen() {
             width={width}
             play={playing}
             videoId={lastVideo.datas.videoId}
-            onChangeState={(state) => {
+            onChangeState={(state: string) => {
               if (state === "ended") {
                 setPlaying(false);
                 setTimeout(() => setPlaying(true), 500);
@@ -248,22 +214,22 @@ export default function HomeScreen() {
           />
         </View>
       )}
-
-      {/* Main list */}
       <FlatList
         ListHeaderComponent={
           <>
-            {/* Marquee */}
-            <View style={styles.marqueeContainer}>
-              <Animated.Text
-                style={[styles.marqueeText, { transform: [{ translateX }] }]}
-                numberOfLines={1}
-              >
-                {marqueeText}
-              </Animated.Text>
-            </View>
+          <View style={styles.marqueeContainer}>
+            <Animated.Text
+              onLayout={(e) => setTextWidth(e.nativeEvent.layout.width)}
+              style={[
+                styles.marqueeText,
+                { transform: [{ translateX: marqueeAnim }] },
+              ]}
+              numberOfLines={1}
+            >
+              {marqueeText}
+            </Animated.Text>
+          </View>
 
-            {/* Ads Gallery */}
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
@@ -272,7 +238,7 @@ export default function HomeScreen() {
               ref={scrollViewRef}
               scrollEnabled={false}
             >
-              {adsImages.map((uri, index) => (
+              {fullList.map((uri, index) => (
                 <TouchableOpacity key={index} style={styles.galleryItem}>
                   <Image source={{ uri }} style={styles.galleryImage} />
                 </TouchableOpacity>
@@ -294,12 +260,14 @@ export default function HomeScreen() {
           )
         }
       />
-    </SafeAreaView>
+    </View>
   );
 }
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#2B4A7C" },
   header: {
+    paddingTop: 16,
+    marginTop: 30,
     backgroundColor: "#2B4A7C",
     flexDirection: "row",
     alignItems: "center",
@@ -319,17 +287,21 @@ const styles = StyleSheet.create({
     height: 220, 
     backgroundColor: "#000000" 
   },
-  marqueeContainer: { 
-    backgroundColor: "#2B4A7C", 
-    paddingVertical: 10, 
-    overflow: "hidden" 
+  marqueeContainer: {
+    width: width,          // 👈 VERY IMPORTANT
+    overflow: "hidden",
+    backgroundColor: "#2B4A7C",
+    paddingVertical: 6,
   },
-  marqueeText: { 
-    fontSize: 14, 
-    color: "#e0dcdcff", 
-    fontFamily: "KhmerOS", 
-    fontWeight: "500" 
+
+  marqueeText: {
+    fontSize: 16,
+    color: "#e0dcdcff",
+    fontFamily: "KhmerOS",
+    fontWeight: "500",
+    paddingHorizontal: 10, // helps readability
   },
+
   galleryScroll: { 
     backgroundColor: "#2B4A7C", 
     marginVertical: 2
@@ -347,8 +319,8 @@ const styles = StyleSheet.create({
   },
   newsCard: { 
     backgroundColor: "#fff", 
-    marginHorizontal: 8, 
-    marginVertical: 6, 
+    marginHorizontal: 5, 
+    marginVertical: 2, 
     borderRadius: 8, 
     overflow: "hidden", 
     shadowColor: "#000", 

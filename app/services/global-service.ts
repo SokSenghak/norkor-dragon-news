@@ -4,9 +4,9 @@ import InAppBrowser from "react-native-inappbrowser-reborn";
 import { Linking } from "react-native";
 
 export default class GlobalService {
-  constructor() {
-    console.log("GlobalService Loaded");
-  }
+  // constructor() {
+  //   console.log("GlobalService Loaded");
+  // }
 
   /* ---------------------- API CONFIGS ---------------------- */
 
