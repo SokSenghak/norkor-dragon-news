@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import SplashScreenComponent from "@/components/SplashScreen";
+import { NotificationProvider } from "@/contexts/NotificationContext";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -12,12 +13,12 @@ const queryClient = new QueryClient();
 
 function RootLayoutNav() {
   return (
-    <Stack screenOptions={{ headerBackTitle: "ត្រឡប" }}>
+    <Stack screenOptions={{ headerBackTitle: "មុន" }}>
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen 
         name="article/[id]" 
         options={{ 
-          headerShown: false,
+          headerShown: true,
           title: "ព័ត៌មានលម្អិត",
           headerStyle: { backgroundColor: "#2B4A7C" },
           headerTintColor: "#FFFFFF",
@@ -56,9 +57,11 @@ export default function RootLayout() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <RootLayoutNav />
-      </GestureHandlerRootView>
+      <NotificationProvider>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <RootLayoutNav />
+        </GestureHandlerRootView>
+      </NotificationProvider>
     </QueryClientProvider>
   );
 }
