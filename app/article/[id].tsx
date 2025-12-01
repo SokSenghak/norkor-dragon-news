@@ -18,6 +18,7 @@ import {
 
 import GlobalService from "../services/global-service";
 import NkdNewsService from "../services/nkdNewsService";
+import AutoMarqueeRepeat from "@/components/AutoMarqueeRepeat";
 
 const { width } = Dimensions.get("window");
 
@@ -36,14 +37,10 @@ interface Post {
 export default function PostDetailScreen() {
   const globalService = new GlobalService();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const [marqueeText, setMarqueeText] = useState("");
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
   const nkd = new NkdNewsService(globalService);
   const [adsImages, setAdsImages] = useState<string[]>([]);
-  const marqueeAnim = useRef(new Animated.Value(0)).current;
-  const [textWidth, setTextWidth] = useState(0);
-  const [containerWidth, setContainerWidth] = useState(width);
   const scrollViewRef = useRef(null);
   const [fullList, setFullList] = useState([]);
   
@@ -78,26 +75,6 @@ export default function PostDetailScreen() {
     }
     fetchPost();
   }, [id]);
-
-  // use post.breaking for marquee if available
-  useEffect(() => {
-    if (!post || textWidth === 0) return;
-    const text = "នគរដ្រេហ្គន​ ព័ត៌មានជាតិ-អន្តរជាតិទាន់ហេតុការណ៍ សម្បូរបែប ប្រកបដោយក្រមសីលធម៍ និងវិជ្ជាជីវៈដោយផ្ទាល់";
-    setMarqueeText(text);
-    marqueeAnim.setValue(containerWidth);
-    Animated.loop(
-      Animated.timing(marqueeAnim, {
-        toValue: -textWidth,
-        duration: textWidth * 25, // speed auto depends on text length
-        useNativeDriver: true,
-      })
-    ).start();
-  }, [post, textWidth]);
-
-  const translateX = marqueeAnim.interpolate({
-    inputRange: [-1, 0],
-    outputRange: [-width * 2, 0],
-  });
 
   const handleShare = async () => {
     try {
@@ -178,18 +155,14 @@ export default function PostDetailScreen() {
       
       <View
         style={styles.marqueeContainerAds}
-        onLayout={(e) => setContainerWidth(e.nativeEvent.layout.width)}
       >
-        <Animated.Text
-          onLayout={(e) => setTextWidth(e.nativeEvent.layout.width)}
-          style={[
-            styles.marqueeText, { fontFamily: "KhmerOS",
-            transform: [{ translateX: marqueeAnim }] },
-          ]}
-          numberOfLines={1}
-        >
-          {marqueeText}
-        </Animated.Text>
+         <AutoMarqueeRepeat
+          text="នគរដ្រេហ្គន​ ព័ត៌មានជាតិ-អន្តរជាតិទាន់ហេតុការណ៍ សម្បូរបែប ប្រកបដោយក្រមសីលធម៍ និងវិជ្ជាជីវៈដោយផ្ទាល់"
+          speed={40}
+          textStyle={{ fontFamily: "KhmerOS", fontSize: 16, color: "#e0dcdcff" }}
+          containerStyle={{ backgroundColor: "#2B4A7C", paddingVertical: 6 }}
+        />
+
         <ScrollView
           ref={scrollViewRef}
           horizontal
@@ -282,7 +255,7 @@ const styles = StyleSheet.create({
   shareButtonText: { fontSize: 14, fontWeight: "600", color: "#FFFFFF" },
   scrollView: { flex: 1 },
   marqueeContainer: { backgroundColor: "#2B4A7C", paddingVertical: 10, overflow: "hidden" },
-  marqueeText: { fontSize: 14, color: "#FFFFFF", fontWeight: "500" },
+  marqueeText: { fontSize: 14, color: "#FFFFFF", fontWeight: "500" ,fontFamily: "KhmerOS"},
   galleryContent: { paddingHorizontal: 8, paddingVertical: 12, gap: 8 },
   galleryItem: { marginRight: 8 },
   galleryImage: { width: 180, height: 80, borderRadius: 8 },

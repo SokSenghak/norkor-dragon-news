@@ -14,6 +14,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import YoutubePlayer from "react-native-youtube-iframe";
 import GlobalService from "../services/global-service";
 import NkdNewsService from "../services/nkd-news/nkd-news";
+import { Audio } from "expo-av";
 
 const { width } = Dimensions.get("window");
 
@@ -29,6 +30,39 @@ export default function VideosScreen() {
   const [hasMore, setHasMore] = useState(true);
   const scrollViewRef = useRef<ScrollView>(null);
   const [adsImages, setAdsImages] = useState<string[]>([]);
+
+  // Sound refs
+  const refreshSound = useRef<Audio.Sound | null>(null);
+  const [soundLoaded, setSoundLoaded] = useState(false);
+
+  // Load sound once on mount
+  useEffect(() => {
+    const loadSound = async () => {
+      try {
+        refreshSound.current = new Audio.Sound();
+        await refreshSound.current.loadAsync(require("../../assets/audio/loading.mp3"));
+        setSoundLoaded(true);
+      } catch (err) {
+        console.log("Sound preload error:", err);
+      }
+    };
+
+    loadSound();
+
+    return () => {
+      refreshSound.current?.unloadAsync();
+    };
+  }, []);
+
+  const playSound = async () => {
+    try {
+      if (refreshSound.current && soundLoaded) {
+        await refreshSound.current.replayAsync();
+      }
+    } catch (err) {
+      console.log("Play sound error:", err);
+    }
+  };
 
   const loadAds = async () => {
     const res = await nkd.getAdsByID({ page_id: 885629 });
@@ -64,6 +98,7 @@ export default function VideosScreen() {
   const fetchVideos = async (pageNumber: number) => {
     if (loading || !hasMore) return;
     setLoading(true);
+    await playSound(); // play preloaded sound
     const videoData = await globalService.listAllVideo(10, pageNumber);
     if (videoData?.datas?.length > 0) {
       setAllVideo((prev) => [...prev, ...videoData.datas]);
@@ -122,8 +157,7 @@ export default function VideosScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.container} edges={["top"]}>
-      <Stack.Screen options={{ headerShown: false }} />
+    <View style={styles.container}>
       <YoutubePlayer
         height={220}
         width={width}
@@ -160,18 +194,18 @@ export default function VideosScreen() {
         }}
         onEndReachedThreshold={0.5}
       />
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#2B4A7C" },
-  galleryScroll: { marginVertical: 4 },
+  galleryScroll: { marginVertical: 2 },
   galleryImage: {
     width: 180,
     height: 120,
     marginRight: 5,
-    borderRadius: 10,
+    // borderRadius: 10,
   },
 
   adBanner: {
@@ -184,8 +218,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     backgroundColor: "#fff",
     marginHorizontal: 10,
-    marginVertical: 6,
-    padding: 10,
+    marginVertical: 2,
+    padding: 7,
     borderRadius: 8,
   },
   thumbnail: {

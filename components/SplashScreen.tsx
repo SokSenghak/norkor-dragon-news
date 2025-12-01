@@ -86,6 +86,7 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: "#2B4A7C",
     textAlign: "center",
+    fontFamily: "KhmerOS",
     marginTop: 8,
   },
   appSubtitle: {
@@ -93,6 +94,7 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     color: "#4A5568",
     textAlign: "center",
+    fontFamily: "KhmerOS",
     lineHeight: 22,
   },
   appDescription: {
