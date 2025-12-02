@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>567186160978-rcrpaejrrm521fq205um416tema044km.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.567186160978-rcrpaejrrm521fq205um416tema044km</string>
+	<key>API_KEY</key>
+	<string>AIzaSyAuoaE-QyiO_l1B_AZjwAv3NBNTvPRUFUs</string>
+	<key>GCM_SENDER_ID</key>
+	<string>567186160978</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.inoover.NokorDragonNews</string>
+	<key>PROJECT_ID</key>
+	<string>nkdnews-push-notification</string>
+	<key>STORAGE_BUCKET</key>
+	<string>nkdnews-push-notification.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:567186160978:ios:220e6fd0a93074b5</string>
+	<key>DATABASE_URL</key>
+	<string>https://nkdnews-push-notification.firebaseio.com</string>
+</dict>
+</plist>

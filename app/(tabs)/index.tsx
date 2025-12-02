@@ -16,7 +16,7 @@ import * as Font from "expo-font";
 import logo from "../../assets/images/icon.png";
 import GlobalService from "../services/global-service";
 import NkdNewsService from "../services/nkd-news/nkd-news";
-import { FlatList, RefreshControl } from "react-native-gesture-handler";
+import { FlatList, GestureHandlerRootView, RefreshControl } from "react-native-gesture-handler";
 import AutoMarqueeRepeat from "../../components/AutoMarqueeRepeat";
 import { Audio } from "expo-av";
 
@@ -261,17 +261,26 @@ export default function HomeScreen() {
       </View>
 
       {/* News List */}
+     <GestureHandlerRootView style={{ flex: 1 }}>
+      {/* News List */}
       <FlatList
         data={newsArticles}
         renderItem={renderArticle}
         keyExtractor={(item) => item.id.toString()}
         onEndReached={loadMore}
         onEndReachedThreshold={0.4}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
         ListFooterComponent={
-          loadingMore ? <ActivityIndicator size="small" style={{ marginVertical: 10 }} /> : <View style={{ height: 10 }} />
+          loadingMore ? (
+            <ActivityIndicator size="small" style={{ marginVertical: 10 }} />
+          ) : (
+            <View style={{ height: 10 }} />
+          )
         }
       />
+    </GestureHandlerRootView>
     </View>
   );
 }

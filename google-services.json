@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "567186160978",
+    "firebase_url": "https://nkdnews-push-notification.firebaseio.com",
+    "project_id": "nkdnews-push-notification",
+    "storage_bucket": "nkdnews-push-notification.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:567186160978:android:2c3d1d8b5c917009",
+        "android_client_info": {
+          "package_name": "com.inoover.nokorwatnews"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "567186160978-fej5preupc71l03mtisr8t2025bqcg69.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD5LfA0aAaR-lduM5gzwySht0gFB-f7HQk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "567186160978-buuv8poha5n1vhsdbj2kt3rlpvqkiphe.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "567186160978-rcrpaejrrm521fq205um416tema044km.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.inoover.NokorDragonNews",
+                "app_store_id": "997216404"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
