@@ -19,7 +19,7 @@
         "./assets/audio/notification.mp3"
       ],
       "supportsTablet": true,
-      "bundleIdentifier": "app.rork.norrkor-dragon-news",
+      "bundleIdentifier": "com.inoover.NokorDragonNews",
       "googleServicesFile": "./GoogleService-Info.plist",
       "infoPlist": {
         "UIBackgroundModes": ["remote-notification"]
@@ -35,7 +35,7 @@
         "backgroundColor": "#ffffff"
       },
       "googleServicesFile": "./google-services.json",
-      "package": "app.rork.norrkor_dragon_news",
+      "package": "com.inoover.nokorwatnews",
       "permissions": [
         "android.permission.RECEIVE_BOOT_COMPLETED",
         "android.permission.SCHEDULE_EXACT_ALARM"

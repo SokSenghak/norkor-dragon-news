@@ -68,16 +68,6 @@ function RootLayoutNav() {
           headerTitleStyle: { fontWeight: "700" },
         }} 
       />
-      <Stack.Screen 
-        name="video/[id]" 
-        options={{ 
-          headerShown: true,
-          title: "វីដេអូ",
-          headerStyle: { backgroundColor: "#2B4A7C" },
-          headerTintColor: "#FFFFFF",
-          headerTitleStyle: { fontWeight: "700" },
-        }} 
-      />
     </Stack>
   );
 }

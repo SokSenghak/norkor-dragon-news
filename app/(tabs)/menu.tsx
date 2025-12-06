@@ -23,6 +23,7 @@ interface MenuItem {
   title: string;
   icons: any; // can be ReactNode or require(image)
   action: () => void;
+  isPage: boolean
 }
 
 export default function MenuScreen() {
@@ -38,16 +39,16 @@ export default function MenuScreen() {
   };
 
   const menuItems: MenuItem[] = [
-    { title: 'ទំព័រដើម', url: '/', id: "home", icons: homeImg, action: () => router.push('/') },
-    { title: 'ព័ត៌មានជាតិ', url: '/list/66', id: "66", icons: domestic, action: () => router.push('/list/66') },
-    { title: 'ព័ត៌មានអន្តរជាតិ', url: '/list/8', id: "8", icons: international, action: () => router.push('/list/8') },
-    { title: 'អចលនទ្រព', url: '/list/19', id: "19", icons: real_estate, action: () => router.push('/list/19') },
-    { title: 'សិល្បៈ កីឡា ការងារ', url: '/list/67_15', id: "67,15", icons: sport, action: () => router.push('/list/67_15') },
-    { title: 'រឿងព្រេងនិទាន & ប្រវត្ដិសាស្រ្ដខ្មែរ', url: '/list/71', id: "71", icons: book_story, action: () => router.push('/list/71') },
-    { title: 'បណ្តាញសង្គម', url: '/page/5724', id: "5724", icons: social_network, action: () => router.push('/list/5724') },
-    { title: 'លេខសង្រ្គោះបន្ទាន់', url: '/page/38051', id: "38051", icons: emergency_number, action: () => router.push('/list/38051') },
-    { title: 'ទំនាក់ទំនងផ្សាយពាណិជ្ជកម្ម', url: '/page/7427', id: "7427", icons: ads, action: () => router.push('/list/7427') },
-    { title: 'អំពី យើង (នគរ ដ្រេហ្គន)', url: '/page/412314', id: "412314", icons: about, action: () => router.push('/list/412314') },
+    { title: 'ទំព័រដើម', url: '/', id: "home", icons: homeImg, action: () => router.push('/'), isPage: false },
+    { title: 'ព័ត៌មានជាតិ', url: '/list/66', id: "66", icons: domestic, action: () => router.push('/list/66'), isPage: false },
+    { title: 'ព័ត៌មានអន្តរជាតិ', url: '/list/8', id: "8", icons: international, action: () => router.push('/list/8'), isPage: false },
+    { title: 'អចលនទ្រព', url: '/list/19', id: "19", icons: real_estate, action: () => router.push('/list/19'), isPage: false },
+    { title: 'សិល្បៈ កីឡា ការងារ', url: '/list/67,15', id: "67,15", icons: sport, action: () => router.push('/list/67,15'), isPage: false },
+    { title: 'រឿងព្រេងនិទាន & ប្រវត្ដិសាស្រ្ដខ្មែរ', url: '/list/71', id: "71", icons: book_story, action: () => router.push('/list/71'), isPage: false },
+    { title: 'បណ្តាញសង្គម', url: '/page/5724', id: "5724", icons: social_network, action: () => router.push('/list/5724'), isPage: true},
+    { title: 'លេខសង្រ្គោះបន្ទាន់', url: '/page/38051', id: "38051", icons: emergency_number, action: () => router.push('/list/38051'), isPage: true },
+    { title: 'ទំនាក់ទំនងផ្សាយពាណិជ្ជកម្ម', url: '/page/7427', id: "7427", icons: ads, action: () => router.push('/list/7427'), isPage: true },
+    { title: 'អំពី យើង (នគរ ដ្រេហ្គន)', url: '/page/412314', id: "412314", icons: about, action: () => router.push('/list/412314'), isPage: true },
   ];
   
   useEffect(() => {
