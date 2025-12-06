@@ -10,7 +10,7 @@ export default function NotFoundScreen() {
         <Text style={styles.subtitle}>This page doesn&apos;t exist</Text>
 
         <Link href="/" style={styles.link}>
-          <Text style={styles.linkText}>ត្រឡប់ទៅទំព័រដើម</Text>
+          <Text style={styles.linkText}>ត្រលប់ទៅទំព័រដើម</Text>
         </Link>
       </View>
     </>

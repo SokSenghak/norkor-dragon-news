@@ -1,3 +1,4 @@
+import 'react-native-reanimated';
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -60,7 +61,7 @@ function RootLayoutNav() {
       <Stack.Screen 
         name="article/[id]" 
         options={{ 
-          headerShown: true,
+          headerShown: false,
           title: "ព័ត៌មានលម្អិត",
           headerStyle: { backgroundColor: "#2B4A7C" },
           headerTintColor: "#FFFFFF",

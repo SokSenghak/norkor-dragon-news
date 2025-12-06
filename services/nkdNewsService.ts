@@ -1,10 +1,9 @@
-import axios from "axios";
-import GlobalService from "../global-service";
+import http from "./httpClient";
 
 export default class NkdNewsService {
-  globalService: GlobalService;
+  globalService: any;
 
-  constructor(globalService: GlobalService) {
+  constructor(globalService: any) {
     this.globalService = globalService;
   }
 
@@ -19,7 +18,7 @@ export default class NkdNewsService {
       `&consumer_password=${this.globalService.api.consumerPassword}` +
       `&per_page=${per_page}&page=${page}`;
 
-    const res = await axios.get(url);
+    const res = await http.get(url);
     return res.data;
   }
 
@@ -35,7 +34,7 @@ export default class NkdNewsService {
       `&per_page=${per_page}&page=${page}`;
 
     try {
-      const res = await axios.get(url);
+      const res = await http.get(url);
       return res.data;
     } catch (err) {
       console.log("getAllNew Error:", err);
@@ -52,7 +51,7 @@ export default class NkdNewsService {
       `page?id=${page_id}`;
 
     try {
-      const res = await axios.get(url);
+      const res = await http.get(url);
       return res.data;
     } catch (err) {
       console.log("getAdsByID Error:", err);
@@ -72,7 +71,7 @@ export default class NkdNewsService {
       `&consumer_password=${this.globalService.api.consumerPassword}` +
       `&per_page=${per_page}&page=${page}&id=${category_id}`;
 
-    const res = await axios.get(url);
+    const res = await http.get(url);
     return res.data;
   }
 
@@ -89,10 +88,10 @@ export default class NkdNewsService {
       `&per_page=${per_page}&page=${page}&id=${category_id}`;
 
     try {
-      const res = await axios.get(url);
+      const res = await http.get(url);
       return res.data;
     } catch (err) {
-      console.log("getAllByCategoryIdNew Error:", err);
+      console.log("getAllByCategoryIdNew nkdNesSerive Error:", err);
       return null;
     }
   }
@@ -105,7 +104,7 @@ export default class NkdNewsService {
       `${this.globalService.fast_api.url}${this.globalService.fast_api.path}` +
       `page?id=${page_id}`;
 
-    const res = await axios.get(url);
+    const res = await http.get(url);
     return res.data;
   }
 
@@ -115,7 +114,7 @@ export default class NkdNewsService {
 
     const url = `${this.globalService.api_v2.url}/wp-json/wp/v2/posts/${page_id}`;
 
-    const res = await axios.get(url);
+    const res = await http.get(url);
     return res.data;
   }
 }

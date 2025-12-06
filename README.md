@@ -38,3 +38,12 @@ rm -rf .expo node_modules package-lock.json
 rm -rf .expo node_modules package-lock.json
 
 npm install @react-native-firebase/app @react-native-firebase/messaging
+
+## Build white screen in react native need to add this in main layout
+
+import 'react-native-reanimated';
+
+
+## run debug with devices
+
+npx expo run:android

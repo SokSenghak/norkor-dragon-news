@@ -14,11 +14,13 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import YoutubePlayer from "react-native-youtube-iframe";
 import * as Font from "expo-font";
 import logo from "../../assets/images/icon.png";
-import GlobalService from "../services/global-service";
-import NkdNewsService from "../services/nkd-news/nkd-news";
+import GlobalService from "../../services/global-service";
+import NkdNewsService from "../../services/nkd-news/nkd-news";
 import { FlatList, GestureHandlerRootView, RefreshControl } from "react-native-gesture-handler";
 import AutoMarqueeRepeat from "../../components/AutoMarqueeRepeat";
 import { Audio } from "expo-av";
+import { useNotifications } from "@/contexts/NotificationContext";
+import * as Clipboard from "expo-clipboard";
 
 const { width } = Dimensions.get("window");
 
@@ -35,10 +37,16 @@ export default function HomeScreen() {
   const scrollViewRef = useRef<ScrollView>(null);
   const globalService = new GlobalService();
   const nkd = new NkdNewsService(globalService);
-
+  const { fcmToken, expoPushToken } = useNotifications();
   // Sound refs
   const refreshSound = useRef<Audio.Sound | null>(null);
   const [soundLoaded, setSoundLoaded] = useState(false);
+
+  const copyToken = async () => {
+    if (!fcmToken) return;
+    await Clipboard.setStringAsync(fcmToken);
+    alert("Copied to clipboard!");
+  };
 
   // Load sound once on mount
   useEffect(() => {
@@ -262,6 +270,19 @@ export default function HomeScreen() {
 
       {/* News List */}
      <GestureHandlerRootView style={{ flex: 1 }}>
+      {/* <View style={styles.tokenBox}>
+            <Text selectable style={styles.token}>
+              {fcmToken || "No FCM Token yet"}
+            </Text>
+          </View>
+
+          <TouchableOpacity 
+            style={styles.copyBtn} 
+            onPress={copyToken}
+            disabled={!fcmToken}
+          >
+            <Text style={styles.copyText}>Copy FCM Token</Text>
+          </TouchableOpacity> */}
       {/* News List */}
       <FlatList
         data={newsArticles}
@@ -299,10 +320,12 @@ const styles = StyleSheet.create({
   },
   logo: { width: 40, height: 40, borderRadius: 8 },
   headerTitle: { 
+    textAlign: "center",
     fontSize: 18, 
     fontWeight: "700", 
     color: "#e0dcdcff", 
-    fontFamily: "KhmerOS" },
+    fontFamily: "KhmerOS" 
+  },
   scrollView: { flex: 1 },
   youtubeContainer: { 
     width: width, 
@@ -354,6 +377,38 @@ const styles = StyleSheet.create({
     shadowRadius: 2, 
     elevation: 2 
   },
+  tokenBox: {
+    backgroundColor: "#FFF",
+    padding: 15,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#DDD",
+    marginBottom: 15,
+  },
+  token: {
+    fontSize: 14,
+    color: "#333",
+  },
+  copyBtn: {
+    backgroundColor: "#007AFF",
+    padding: 12,
+    borderRadius: 10,
+    alignItems: "center",
+    marginBottom: 25,
+  },
+  copyText: {
+    color: "white",
+    fontWeight: "600",
+  },
+  label: {
+    fontWeight: "700",
+    marginBottom: 5,
+  },
+  tokenSmall: {
+    fontSize: 12,
+    color: "#333",
+  },
+
   newsImage: { width: "40%", borderRadius: 8, height: 100 },
   newsContent: { padding: 12 },
   newsCategory: { fontSize: 12, color: "#2B4A7C", fontWeight: "600", marginBottom: 4 },

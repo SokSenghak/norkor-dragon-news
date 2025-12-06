@@ -12,8 +12,8 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import YoutubePlayer from "react-native-youtube-iframe";
-import GlobalService from "../services/global-service";
-import NkdNewsService from "../services/nkd-news/nkd-news";
+import GlobalService from "../../services/global-service";
+import NkdNewsService from "../../services/nkd-news/nkd-news";
 import { Audio } from "expo-av";
 
 const { width } = Dimensions.get("window");

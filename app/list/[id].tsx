@@ -11,8 +11,8 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as Font from "expo-font";
-import GlobalService from "../services/global-service";
-import NkdNewsService from "../services/nkd-news/nkd-news";
+import GlobalService from "../../services/global-service";
+import NkdNewsService from "../../services/nkd-news/nkd-news";
 import { ChevronLeft } from "lucide-react-native";
 
 export default function ListByCategoryScreen() {
@@ -48,6 +48,8 @@ export default function ListByCategoryScreen() {
       per_page: 10,
       page: nextPage,
     });
+    
+    console.log("Fetched posts for category_id:", id, "page:", nextPage, "res:", res);
     
     if (res?.data?.data.length > 0) {
       setNews((prev) => [...prev, ...res?.data?.data]);
@@ -102,9 +104,9 @@ export default function ListByCategoryScreen() {
 						<Text style={[styles.cardTitle, { fontFamily: "KhmerOS" }]}>
 							{item.title.rendered}
 						</Text>
-						{/* <Text style={styles.cardTitletext}>
+						<Text style={styles.cardTitletext}>
 							{item.title.rendered}
-						</Text> */}
+						</Text>
 					</View>
         )}
       </View>
@@ -124,7 +126,7 @@ export default function ListByCategoryScreen() {
 					<View style={styles.backInner}>
 						<ChevronLeft size={20} color="#fff" />
 						<Text style={[styles.backBtn, { fontFamily: "KhmerOS", marginLeft: 5 }]}>
-							ត្រឡប
+							ត្រលប់
 						</Text>
 					</View>
 				</TouchableOpacity>

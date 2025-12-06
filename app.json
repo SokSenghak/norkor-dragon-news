@@ -14,6 +14,10 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
+      "sound": true,
+      "assets": [
+        "./assets/audio/notification.mp3"
+      ],
       "supportsTablet": true,
       "bundleIdentifier": "app.rork.norrkor-dragon-news",
       "googleServicesFile": "./GoogleService-Info.plist",
@@ -22,6 +26,10 @@
       }
     },
     "android": {
+      "sound": true,
+      "assets": [
+        "./assets/audio/notification.mp3"
+      ],
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"

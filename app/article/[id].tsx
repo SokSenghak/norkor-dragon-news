@@ -16,8 +16,8 @@ import {
   View,
 } from "react-native";
 
-import GlobalService from "../services/global-service";
-import NkdNewsService from "../services/nkdNewsService";
+import GlobalService from "../../services/global-service";
+import NkdNewsService from "../../services/nkdNewsService";
 import AutoMarqueeRepeat from "@/components/AutoMarqueeRepeat";
 
 const { width } = Dimensions.get("window");
@@ -145,7 +145,7 @@ export default function PostDetailScreen() {
           onPress={() => router.back()}
         >
           <ChevronLeft size={22} color="#FFFFFF" />
-          <Text style={styles.backButtonText}>ត្រឡប់ក្រោយ</Text>
+          <Text style={styles.backButtonText}>ត្រលប់</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.shareButton} onPress={handleShare}>
           <Share2 size={20} color="#FFFFFF" />
