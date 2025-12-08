@@ -14,7 +14,7 @@ export default function TabLayout() {
         tabBarStyle: {
           backgroundColor: "#2B4A7C",
           borderTopWidth: 0,
-          height: isIOS ? 70 : 90, // iOS taller
+          height: isIOS ? 70 : 100, // iOS taller
           paddingBottom: 5,        // only bottom padding
         },
         tabBarLabelStyle: {

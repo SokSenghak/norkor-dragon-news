@@ -14,10 +14,11 @@ import * as Font from "expo-font";
 import GlobalService from "../../services/global-service";
 import NkdNewsService from "../../services/nkd-news/nkd-news";
 import { ChevronLeft } from "lucide-react-native";
+import ContentPage from "../../components/ContentPage";
 
 export default function ListByCategoryScreen() {
   const router = useRouter();
-  const { id } = useLocalSearchParams();
+  const { id, title, isPage } = useLocalSearchParams();
   const globalService = new GlobalService();
   const nkd = new NkdNewsService(globalService);
   const [fontsLoaded, setFontsLoaded] = useState(false);
@@ -48,8 +49,6 @@ export default function ListByCategoryScreen() {
       per_page: 10,
       page: nextPage,
     });
-    
-    console.log("Fetched posts for category_id:", id, "page:", nextPage, "res:", res);
     
     if (res?.data?.data.length > 0) {
       setNews((prev) => [...prev, ...res?.data?.data]);
@@ -125,7 +124,7 @@ export default function ListByCategoryScreen() {
 				>
 					<View style={styles.backInner}>
 						<ChevronLeft size={20} color="#fff" />
-						<Text style={[styles.backBtn, { fontFamily: "KhmerOS", marginLeft: 5 }]}>
+						<Text style={[styles.backBtn]}>
 							ត្រលប់
 						</Text>
 					</View>
@@ -133,7 +132,7 @@ export default function ListByCategoryScreen() {
 
         {fontsLoaded ? (
           <Text style={[styles.headerTitle, { fontFamily: "KhmerOS" }]}>
-            ព័ត៌មានតាមប្រភេទ
+            {title || "ព័ត៌មាន នគរដ្រេហ្គន​"}
           </Text>
         ) : null}
       </View>
@@ -158,19 +157,21 @@ export default function ListByCategoryScreen() {
 				</TouchableOpacity>
 			) : null}
 
-			
-      {/* LIST */}
-      <FlatList
-        data={news}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={renderItem}
-        contentContainerStyle={{ paddingBottom: 30 }}
-        onEndReached={loadMore}
-        onEndReachedThreshold={0.5}
-        ListFooterComponent={
-          loading ? <ActivityIndicator size="large" color="#fff" /> : null
-        }
-      />
+      {news.length > 0 ? (
+        <FlatList
+          data={news}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={renderItem}
+          contentContainerStyle={{ paddingBottom: 30 }}
+          onEndReached={loadMore}
+          onEndReachedThreshold={0.5}
+          ListFooterComponent={
+            loading ? <ActivityIndicator size="large" color="#fff" /> : null
+          }
+        />
+      ) : (
+        <ContentPage pageId={Array.isArray(id) ? id[0] : id} />
+      )}
     </SafeAreaView>
   );
 }

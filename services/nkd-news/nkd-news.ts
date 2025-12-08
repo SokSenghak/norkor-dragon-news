@@ -89,7 +89,6 @@ export default class NkdNewsService {
     
     try {
       const res = await axios.get(url);
-      console.log("res.data in getAllByCategoryIdNew:", res.data);
       
       return res.data;
     } catch (err) {
