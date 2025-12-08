@@ -270,24 +270,10 @@ export default function HomeScreen() {
 
       {/* News List */}
      <GestureHandlerRootView style={{ flex: 1 }}>
-      {/* <View style={styles.tokenBox}>
-            <Text selectable style={styles.token}>
-              {fcmToken || "No FCM Token yet"}
-            </Text>
-          </View>
-
-          <TouchableOpacity 
-            style={styles.copyBtn} 
-            onPress={copyToken}
-            disabled={!fcmToken}
-          >
-            <Text style={styles.copyText}>Copy FCM Token</Text>
-          </TouchableOpacity> */}
-      {/* News List */}
       <FlatList
         data={newsArticles}
         renderItem={renderArticle}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item, index) => `${item.id}-${index}`} 
         onEndReached={loadMore}
         onEndReachedThreshold={0.4}
         refreshControl={

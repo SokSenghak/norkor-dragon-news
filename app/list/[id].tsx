@@ -118,17 +118,13 @@ export default function ListByCategoryScreen() {
 
       {/* HEADER */}
       <View style={styles.header}>
-       <TouchableOpacity 
-					style={styles.backContainer} 
-					onPress={() => router.back()}
-				>
-					<View style={styles.backInner}>
-						<ChevronLeft size={20} color="#fff" />
-						<Text style={[styles.backBtn]}>
-							ត្រលប់
-						</Text>
-					</View>
-				</TouchableOpacity>
+        <TouchableOpacity 
+          style={styles.backButton}
+          onPress={() => router.back()}
+        >
+          <ChevronLeft size={22} color="#FFFFFF" />
+          <Text style={styles.backButtonText}>ត្រលប់</Text>
+        </TouchableOpacity>
 
         {fontsLoaded ? (
           <Text style={[styles.headerTitle, { fontFamily: "KhmerOS" }]}>
@@ -184,20 +180,27 @@ const styles = StyleSheet.create({
 	backContainer: {
 		padding: 5,
 	},
-	backInner: {
-		flexDirection: "row",
-		alignItems: "center",
-	},
+	backButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    borderWidth: 1,
+    borderColor: "#FFFFFF",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  backButtonText: {
+    color: "#FFFFFF",
+    fontSize: 15,
+    fontWeight: "600",
+  },
   header: {
     backgroundColor: "#2B4A7C",
     padding: 16,
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
-  },
-  backBtn: {
-    fontSize: 16,
-    color: "#fff",
   },
   headerTitle: {
     fontSize: 18,

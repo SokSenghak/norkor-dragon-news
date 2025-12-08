@@ -219,9 +219,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    backgroundColor: "rgba(255,255,255,0.2)",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    borderWidth: 1,
+    borderColor: "#FFFFFF",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
     borderRadius: 8,
   },
   backButtonText: {
@@ -235,7 +236,7 @@ const styles = StyleSheet.create({
     alignItems: "center" 
   },
   headerButtons: {
-    paddingTop: Platform.OS === "ios" ? 50 : 20,
+    paddingTop: Platform.OS === "ios" ? 60 : 30,
     flexDirection: "row",
     justifyContent: "space-between",
     paddingHorizontal: 16,
@@ -246,11 +247,12 @@ const styles = StyleSheet.create({
   shareButton: {
     flexDirection: "row", 
     alignItems: "center", 
-    gap: 6, 
-    backgroundColor: "rgba(255,255,255,0.2)", 
-    paddingVertical: 8, 
-    paddingHorizontal: 16, 
-    borderRadius: 20 
+    borderWidth: 1,
+    borderColor: "#FFFFFF",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    gap: 6,
+    borderRadius: 8
   },
   shareButtonText: { fontSize: 14, fontWeight: "600", color: "#FFFFFF" },
   scrollView: { flex: 1 },

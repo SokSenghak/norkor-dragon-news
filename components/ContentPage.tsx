@@ -1,8 +1,9 @@
-import { View, ScrollView, Text, Linking, useWindowDimensions } from "react-native";
+import { View, ScrollView, Text, Linking, useWindowDimensions, TouchableOpacity } from "react-native";
 import RenderHTML from "react-native-render-html";
 import { useEffect, useState } from "react";
 import NkdNewsService from "../services/nkd-news/nkd-news";
 import GlobalService from "@/services/global-service";
+import { Facebook, Send, Youtube } from "lucide-react-native";
 
 export default function ContentPage({ pageId }: { pageId: string | number }) {
     
@@ -30,31 +31,18 @@ export default function ContentPage({ pageId }: { pageId: string | number }) {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ padding: 20 }}
       >
-        {/* Content Card */}
-        <View
-          style={{
-            backgroundColor: "#2B4A7C",
-            padding: 20,
-            borderRadius: 12,
-            shadowColor: "#000",
-            shadowOpacity: 0.3,
-            shadowOffset: { width: 0, height: 2 },
-            shadowRadius: 5,
-            elevation: 5,
-          }}
-        >
+        <View style={{ padding: 15 }}>
           <RenderHTML
             contentWidth={width}
             source={{ html: contentPage }}
             tagsStyles={{
-              p: { color: "#ddd", lineHeight: 22, fontSize: 15 },
+              p: { color: "#ddd", lineHeight: 30, fontSize: 20 },
               a: { color: "#4da6ff" },
               img: { borderRadius: 10, marginVertical: 15 },
             }}
           />
         </View>
 
-        {/* Social Icon Section */}
         <View
           style={{
             marginTop: 25,
@@ -64,19 +52,19 @@ export default function ContentPage({ pageId }: { pageId: string | number }) {
           }}
         >
           <SocialIcon
-            icon="📘"
+            IconComponent={Facebook}
             label="Facebook"
             onPress={() => Linking.openURL("https://www.facebook.com/nkdnews")}
           />
 
           <SocialIcon
-            icon="📨"
+            IconComponent={Send}
             label="Telegram"
             onPress={() => Linking.openURL("https://t.me/NoKorDragonNews")}
           />
 
           <SocialIcon
-            icon="▶️"
+            IconComponent={Youtube}
             label="YouTube"
             onPress={() => Linking.openURL("https://www.youtube.com/@Nkdnews")}
           />
@@ -89,24 +77,16 @@ export default function ContentPage({ pageId }: { pageId: string | number }) {
 }
 
 type SocialIconProps = {
-  icon: string;
+  IconComponent: any;
   label: string;
-  onPress?: (event?: any) => void | Promise<void>;
+  onPress?: () => void;
 };
 
-function SocialIcon({ icon, label, onPress }: SocialIconProps) {
+function SocialIcon({ IconComponent, label, onPress }: SocialIconProps) {
   return (
-    <View style={{ alignItems: "center" }}>
-      <Text
-        style={{
-          fontSize: 38,
-          marginBottom: 5,
-        }}
-        onPress={onPress}
-      >
-        {icon}
-      </Text>
+    <TouchableOpacity style={{ alignItems: "center" }} onPress={onPress}>
+      <IconComponent size={38} color="#fff" />
       <Text style={{ color: "#ccc", fontSize: 12 }}>{label}</Text>
-    </View>
+    </TouchableOpacity>
   );
 }
