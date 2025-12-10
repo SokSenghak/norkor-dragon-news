@@ -1,396 +1,218 @@
-import { useNotifications } from "@/contexts/NotificationContext";
-import { useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput } from "react-native";
-import { Bell, Send, Trash2, Clock } from "lucide-react-native";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { Platform, Alert, Linking } from "react-native";
+import * as Device from "expo-device";
+import * as Notifications from "expo-notifications";
+import createContextHook from "@nkzw/create-context-hook";
 
-export default function NotificationDemo() {
-  const {
-    expoPushToken,
-    notifications,
-    lastNotification,
-    sendImmediateNotification,
-    schedulePushNotification,
-    clearNotifications,
-    cancelAllNotifications,
-    setBadgeCount,
-  } = useNotifications();
+// --- CONFIG ---
+const YOUR_PROJECT_ID = "e1aed192-86b5-4ebb-994f-9cd97adeafa7";
 
-  const [title, setTitle] = useState("New Message");
-  const [body, setBody] = useState("You have a new notification!");
-  const [seconds, setSeconds] = useState("5");
+// ------------------------------
+// Types
+// ------------------------------
+type NotificationData = {
+  id: string;
+  title: string;
+  body: string;
+  data?: Record<string, any>;
+  timestamp: number;
+};
 
-  const handleSendImmediate = async () => {
-    try {
-      await sendImmediateNotification(title, body, { custom: "data" });
-      console.log("Immediate notification sent");
-    } catch (error) {
-      console.error("Failed to send notification:", error);
-    }
-  };
+type NotificationContextType = {
+  expoPushToken: string;
+  fcmToken: string | null;
+  lastNotification: NotificationData | null;
+  notifications: NotificationData[];
+  isReady: boolean;
+  sendImmediateNotification: (
+    title: string,
+    body: string,
+    data?: any
+  ) => Promise<void>;
+  clearNotifications: () => void;
+};
 
-  const handleSchedule = async () => {
-    try {
-      const delay = parseInt(seconds, 10);
-      await schedulePushNotification(title, body, { custom: "data" }, delay);
-      console.log(`Notification scheduled for ${delay} seconds`);
-    } catch (error) {
-      console.error("Failed to schedule notification:", error);
-    }
-  };
-
-  return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      <View style={styles.header}>
-        <Bell size={32} color="#2B4A7C" />
-        <Text style={styles.headerText}>Notifications Demo</Text>
-      </View>
-
-      {expoPushToken ? (
-        <View style={styles.tokenContainer}>
-          <Text style={styles.tokenLabel}>Push Token:</Text>
-          <Text style={styles.tokenText} numberOfLines={2}>
-            {expoPushToken}
-          </Text>
-        </View>
-      ) : null}
-
-      <View style={styles.inputSection}>
-        <Text style={styles.sectionTitle}>Create Notification</Text>
-
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Title</Text>
-          <TextInput
-            style={styles.input}
-            value={title}
-            onChangeText={setTitle}
-            placeholder="Notification title"
-            placeholderTextColor="#999"
-          />
-        </View>
-
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Body</Text>
-          <TextInput
-            style={[styles.input, styles.textArea]}
-            value={body}
-            onChangeText={setBody}
-            placeholder="Notification body"
-            placeholderTextColor="#999"
-            multiline
-            numberOfLines={3}
-          />
-        </View>
-
-        <View style={styles.buttonRow}>
-          <TouchableOpacity
-            style={[styles.button, styles.primaryButton]}
-            onPress={handleSendImmediate}
-            activeOpacity={0.7}
-          >
-            <Send size={18} color="#FFF" />
-            <Text style={styles.buttonText}>Send Now</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.scheduleSection}>
-          <Text style={styles.label}>Schedule (seconds)</Text>
-          <View style={styles.scheduleRow}>
-            <TextInput
-              style={[styles.input, styles.scheduleInput]}
-              value={seconds}
-              onChangeText={setSeconds}
-              placeholder="5"
-              placeholderTextColor="#999"
-              keyboardType="numeric"
-            />
-            <TouchableOpacity
-              style={[styles.button, styles.secondaryButton]}
-              onPress={handleSchedule}
-              activeOpacity={0.7}
-            >
-              <Clock size={18} color="#2B4A7C" />
-              <Text style={[styles.buttonText, styles.secondaryButtonText]}>
-                Schedule
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-
-      {lastNotification && (
-        <View style={styles.lastNotificationSection}>
-          <Text style={styles.sectionTitle}>Last Notification</Text>
-          <View style={styles.notificationCard}>
-            <Text style={styles.notificationTitle}>{lastNotification.title}</Text>
-            <Text style={styles.notificationBody}>{lastNotification.body}</Text>
-            <Text style={styles.notificationTime}>
-              {new Date(lastNotification.timestamp).toLocaleTimeString()}
-            </Text>
-          </View>
-        </View>
-      )}
-
-      <View style={styles.historySection}>
-        <View style={styles.historyHeader}>
-          <Text style={styles.sectionTitle}>
-            History ({notifications.length})
-          </Text>
-          <TouchableOpacity
-            onPress={clearNotifications}
-            style={styles.clearButton}
-            activeOpacity={0.7}
-          >
-            <Trash2 size={18} color="#E53935" />
-          </TouchableOpacity>
-        </View>
-
-        {notifications.length === 0 ? (
-          <Text style={styles.emptyText}>No notifications yet</Text>
-        ) : (
-          notifications.map((notification) => (
-            <View key={notification.id} style={styles.historyCard}>
-              <Text style={styles.historyTitle}>{notification.title}</Text>
-              <Text style={styles.historyBody}>{notification.body}</Text>
-              <Text style={styles.historyTime}>
-                {new Date(notification.timestamp).toLocaleString()}
-              </Text>
-            </View>
-          ))
-        )}
-      </View>
-
-      <View style={styles.actionSection}>
-        <TouchableOpacity
-          style={[styles.button, styles.dangerButton]}
-          onPress={cancelAllNotifications}
-          activeOpacity={0.7}
-        >
-          <Trash2 size={18} color="#FFF" />
-          <Text style={styles.buttonText}>Cancel All Scheduled</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.button, styles.secondaryButton]}
-          onPress={() => setBadgeCount(5)}
-          activeOpacity={0.7}
-        >
-          <Bell size={18} color="#2B4A7C" />
-          <Text style={[styles.buttonText, styles.secondaryButtonText]}>
-            Set Badge to 5
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.button, styles.secondaryButton]}
-          onPress={() => setBadgeCount(0)}
-          activeOpacity={0.7}
-        >
-          <Bell size={18} color="#2B4A7C" />
-          <Text style={[styles.buttonText, styles.secondaryButtonText]}>
-            Clear Badge
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
-  );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#F5F7FA",
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 20,
-    paddingTop: 32,
-    backgroundColor: "#FFF",
-    borderBottomWidth: 1,
-    borderBottomColor: "#E0E0E0",
-    gap: 12,
-  },
-  headerText: {
-    fontSize: 24,
-    fontWeight: "700" as const,
-    color: "#2B4A7C",
-  },
-  tokenContainer: {
-    backgroundColor: "#FFF",
-    padding: 16,
-    marginTop: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: "#E0E0E0",
-  },
-  tokenLabel: {
-    fontSize: 12,
-    fontWeight: "600" as const,
-    color: "#666",
-    marginBottom: 4,
-  },
-  tokenText: {
-    fontSize: 11,
-    color: "#333",
-    fontFamily: "monospace",
-  },
-  inputSection: {
-    backgroundColor: "#FFF",
-    padding: 20,
-    marginTop: 16,
-    borderRadius: 12,
-    marginHorizontal: 16,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "700" as const,
-    color: "#333",
-    marginBottom: 16,
-  },
-  inputGroup: {
-    marginBottom: 16,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: "600" as const,
-    color: "#555",
-    marginBottom: 8,
-  },
-  input: {
-    backgroundColor: "#F5F7FA",
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 14,
-    color: "#333",
-    borderWidth: 1,
-    borderColor: "#E0E0E0",
-  },
-  textArea: {
-    minHeight: 80,
-    textAlignVertical: "top",
-  },
-  buttonRow: {
-    flexDirection: "row",
-    gap: 12,
-    marginTop: 8,
-  },
-  button: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 14,
-    borderRadius: 8,
-    gap: 8,
-    flex: 1,
-  },
-  primaryButton: {
-    backgroundColor: "#2B4A7C",
-  },
-  secondaryButton: {
-    backgroundColor: "#E8EEF5",
-    borderWidth: 1,
-    borderColor: "#2B4A7C",
-  },
-  dangerButton: {
-    backgroundColor: "#E53935",
-  },
-  buttonText: {
-    fontSize: 14,
-    fontWeight: "600" as const,
-    color: "#FFF",
-  },
-  secondaryButtonText: {
-    color: "#2B4A7C",
-  },
-  scheduleSection: {
-    marginTop: 16,
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: "#E0E0E0",
-  },
-  scheduleRow: {
-    flexDirection: "row",
-    gap: 12,
-  },
-  scheduleInput: {
-    flex: 1,
-  },
-  lastNotificationSection: {
-    backgroundColor: "#FFF",
-    padding: 20,
-    marginTop: 16,
-    borderRadius: 12,
-    marginHorizontal: 16,
-  },
-  notificationCard: {
-    backgroundColor: "#E8F5E9",
-    padding: 16,
-    borderRadius: 8,
-    borderLeftWidth: 4,
-    borderLeftColor: "#4CAF50",
-  },
-  notificationTitle: {
-    fontSize: 16,
-    fontWeight: "700" as const,
-    color: "#333",
-    marginBottom: 4,
-  },
-  notificationBody: {
-    fontSize: 14,
-    color: "#555",
-    marginBottom: 8,
-  },
-  notificationTime: {
-    fontSize: 12,
-    color: "#666",
-  },
-  historySection: {
-    backgroundColor: "#FFF",
-    padding: 20,
-    marginTop: 16,
-    borderRadius: 12,
-    marginHorizontal: 16,
-  },
-  historyHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  clearButton: {
-    padding: 8,
-  },
-  emptyText: {
-    fontSize: 14,
-    color: "#999",
-    textAlign: "center",
-    paddingVertical: 20,
-  },
-  historyCard: {
-    backgroundColor: "#F5F7FA",
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 8,
-    borderLeftWidth: 3,
-    borderLeftColor: "#2B4A7C",
-  },
-  historyTitle: {
-    fontSize: 14,
-    fontWeight: "600" as const,
-    color: "#333",
-    marginBottom: 2,
-  },
-  historyBody: {
-    fontSize: 13,
-    color: "#555",
-    marginBottom: 4,
-  },
-  historyTime: {
-    fontSize: 11,
-    color: "#999",
-  },
-  actionSection: {
-    padding: 20,
-    gap: 12,
-    marginBottom: 40,
-  },
+// -----------------------------------
+// Expo Notification Handler
+// -----------------------------------
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true, 
+    shouldPlaySound: true,
+    shouldSetBadge: true, 
+    shouldShowBanner: true, 
+    shouldShowList: true,
+  }),
 });
+
+// -----------------------------------
+// Provider Component
+// -----------------------------------
+export const [NotificationProvider, useNotifications] =
+  createContextHook<NotificationContextType>(() => {
+    const [expoPushToken, setExpoPushToken] = useState<string>("");
+    const [fcmToken, setFcmToken] = useState<string | null>(null);
+
+    const [notifications, setNotifications] = useState<NotificationData[]>([]);
+    const [lastNotification, setLastNotification] =
+      useState<NotificationData | null>(null);
+    const [isReady, setIsReady] = useState(false);
+
+    const notificationListener = useRef<Notifications.Subscription | null>(
+      null
+    );
+    const responseListener = useRef<Notifications.Subscription | null>(null);
+
+    // ------------------------------
+    // Handle Received Notification
+    // ------------------------------
+    const handleNotificationReceived = useCallback(
+      async (notification: Notifications.Notification) => {
+        const content = notification.request.content;
+
+        // Show banner even while app is open
+        await Notifications.presentNotificationAsync({
+          title: content.title,
+          body: content.body,
+          data: content.data,
+        });
+
+        const info: NotificationData = {
+          id: notification.request.identifier,
+          title: content.title ?? "",
+          body: content.body ?? "",
+          data: content.data,
+          timestamp: Date.now(),
+        };
+
+        console.log("🔔 Notification received:", info);
+
+        setLastNotification(info);
+        setNotifications((prev) => [info, ...prev]);
+      },
+      []
+    );
+
+    // ------------------------------
+    // Send Notification (Local)
+    // ------------------------------
+    const sendImmediateNotification = useCallback(
+      async (title: string, body: string, data?: any) => {
+        await Notifications.scheduleNotificationAsync({
+          content: {
+            title,
+            body,
+            data,
+            sound: "notification.mp3", // iOS only
+          },
+          trigger: null,
+        });
+      },
+      []
+    );
+
+    // ------------------------------
+    // Clear Notification History
+    // ------------------------------
+    const clearNotifications = useCallback(() => {
+      setNotifications([]);
+      setLastNotification(null);
+    }, []);
+
+    // ------------------------------
+    // Initialization
+    // ------------------------------
+    useEffect(() => {
+      async function initialize() {
+        try {
+          // 1. Register for push notifications
+          const token = await registerForPushNotificationsAsync(YOUR_PROJECT_ID);
+          if (token) setExpoPushToken(token);
+
+          // 2. FCM token (Android only)
+          const { data: rawFcm } =
+            await Notifications.getDevicePushTokenAsync();
+          setFcmToken(rawFcm);
+
+          // 3. Add listeners
+          notificationListener.current =
+            Notifications.addNotificationReceivedListener(
+              handleNotificationReceived
+            );
+
+          responseListener.current =
+            Notifications.addNotificationResponseReceivedListener((response) => {
+              console.log("🔘 Notification clicked:", response);
+            });
+        } finally {
+          setIsReady(true);
+        }
+      }
+
+      initialize();
+
+      return () => {
+        notificationListener.current?.remove();
+        responseListener.current?.remove();
+      };
+    }, [handleNotificationReceived]);
+
+    return {
+      isReady,
+      expoPushToken,
+      fcmToken,
+      notifications,
+      lastNotification,
+      sendImmediateNotification,
+      clearNotifications,
+    };
+  });
+
+// --------------------------------------------------------------------------
+// Register and Configure Notifications
+// --------------------------------------------------------------------------
+async function registerForPushNotificationsAsync(projectId: string) {
+  let token: string | undefined;
+
+  if (Device.isDevice) {
+    const { status: existingStatus } =
+      await Notifications.getPermissionsAsync();
+    let finalStatus = existingStatus;
+
+    if (existingStatus !== "granted") {
+      const { status } = await Notifications.requestPermissionsAsync();
+      finalStatus = status;
+    }
+
+    if (finalStatus !== "granted") {
+      Alert.alert("Permissions Needed", "Enable notifications in Settings.", [
+        { text: "Cancel", style: "cancel" },
+        { text: "Open Settings", onPress: () => Linking.openSettings() },
+      ]);
+      return;
+    }
+
+    // Android: setup channel with custom sound
+    if (Platform.OS === "android") {
+      await Notifications.setNotificationChannelAsync("default", {
+        name: "Default",
+        importance: Notifications.AndroidImportance.MAX,
+        sound: "notification.mp3", // file from /res/raw/
+        vibrationPattern: [0, 250, 250, 250],
+      });
+    }
+
+    try {
+      if (!projectId) throw new Error("Missing Project ID");
+
+      token = (
+        await Notifications.getExpoPushTokenAsync({ projectId })
+      ).data;
+    } catch (e) {
+      console.error("Push token error:", e);
+      token = `Error: ${String(e)}`;
+    }
+  }
+
+  return token;
+}

@@ -267,6 +267,19 @@ export default function HomeScreen() {
           ))}
         </ScrollView>
       </View>
+       <View style={styles.tokenBox}>
+            <Text selectable style={styles.token}>
+              {fcmToken || "No FCM Token yet"}
+            </Text>
+          </View>
+
+          <TouchableOpacity 
+            style={styles.copyBtn} 
+            onPress={copyToken}
+            disabled={!fcmToken}
+          >
+            <Text style={styles.copyText}>Copy FCM Token</Text>
+          </TouchableOpacity>
 
       {/* News List */}
      <GestureHandlerRootView style={{ flex: 1 }}>

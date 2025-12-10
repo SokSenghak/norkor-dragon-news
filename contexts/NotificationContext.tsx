@@ -63,7 +63,7 @@ export const [
   const handleNotificationReceived = useCallback(async (notification: Notifications.Notification) => {
 
     // Force banner to show even when app is active
-    await Notifications.presentNotificationAsync(notification.request.content);
+    // await Notifications.presentNotificationAsync(notification.request.content);
 
     const info: NotificationData = {
       id: notification.request.identifier,
@@ -175,11 +175,11 @@ async function registerForPushNotificationsAsync(projectId: string) {
 
     // Android notification channel
     if (Platform.OS === 'android') {
-      await Notifications.setNotificationChannelAsync('default', {
-        name: 'Default Notifications',
+      await Notifications.setNotificationChannelAsync("sound_channel", {
+        name: "Sound Channel",
         importance: Notifications.AndroidImportance.MAX,
-        vibrationPattern: [0, 250, 250, 250],
-        lightColor: '#FF231F7C',
+        sound: "notification.mp3",   // must match res/raw/notification.mp3
+        vibrationPattern: [0, 250, 250, 250]
       });
     }
 
