@@ -49,7 +49,8 @@
       "expo-font",
       "expo-web-browser",
       "@react-native-firebase/app",
-      "@react-native-firebase/messaging"
+      "@react-native-firebase/messaging",
+      ["expo-notifications",{"sounds": ["./assets/audio/sound.wav"]}]
     ],
     "experiments": {
       "typedRoutes": true

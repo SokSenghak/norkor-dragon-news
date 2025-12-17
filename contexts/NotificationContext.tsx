@@ -98,7 +98,9 @@ export const [
 
       try {
         // 1. Expo Push Token
-        // const token = await registerForPushNotificationsAsync(YOUR_PROJECT_ID);
+        const token = await registerForPushNotificationsAsync(YOUR_PROJECT_ID);
+        console.log("Loadding Token", token);
+        
         // if (token) setExpoPushToken(token);
 
         // 2. FCM Token
@@ -175,10 +177,11 @@ async function registerForPushNotificationsAsync(projectId: string) {
 
     // Android notification channel
     if (Platform.OS === 'android') {
+      // console.log("Yea android");
       await Notifications.setNotificationChannelAsync("sound_channel", {
         name: "Sound Channel",
         importance: Notifications.AndroidImportance.MAX,
-        sound: "notification.mp3",   // must match res/raw/notification.mp3
+        sound: "sound.wav",   // must match res/raw/notification.mp3
         vibrationPattern: [0, 250, 250, 250]
       });
     }
@@ -190,7 +193,7 @@ async function registerForPushNotificationsAsync(projectId: string) {
         await Notifications.getExpoPushTokenAsync({ projectId })
       ).data;
 
-      // console.log("Expo Push Token:", token);
+      console.log("Expo Push Token: ===>", token);
 
     } catch (e) {
       console.error("Token error:", e);
