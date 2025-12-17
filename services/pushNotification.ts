@@ -1,5 +1,5 @@
 import messaging from '@react-native-firebase/messaging';
-import { Platform } from 'react-native';
+import { Alert, Platform } from 'react-native';
 
 // Request permission + get FCM token
 export async function initPush() {
@@ -8,6 +8,7 @@ export async function initPush() {
   await messaging().requestPermission();
 
   const token = await messaging().getToken();
+  Alert.alert("token: "+token)
   console.log('🔥 FCM TOKEN:', token);
 
   return token;
