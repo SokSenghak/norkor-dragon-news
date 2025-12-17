@@ -10,6 +10,7 @@ import SplashScreenComponent from "@/components/SplashScreen";
 
 // ⚠️ FIX APPLIED: Changed to a NAMED import { ... }
 import { NotificationProvider } from "@/contexts/NotificationContext";
+import { initPush, listenPush, subscribeAllDevice } from '@/services/pushNotification';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -53,7 +54,17 @@ function useNotificationObserver() {
 // ----------------------------------------------------
 function RootLayoutNav() {
   // Use the useNotificationObserver hook here
-  useNotificationObserver(); 
+  // useNotificationObserver(); // Old
+  
+  // Start New
+  useEffect(() => {
+    initPush();
+    subscribeAllDevice();
+
+    const unsubscribe = listenPush();
+    return unsubscribe;
+  }, []);
+  // End New
 
   return (
     <Stack screenOptions={{ headerBackTitle: "មុន" }}>
@@ -93,11 +104,11 @@ export default function RootLayout() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <NotificationProvider>
+      {/* <NotificationProvider> */}
         <GestureHandlerRootView style={{ flex: 1 }}>
           <RootLayoutNav />
         </GestureHandlerRootView>
-      </NotificationProvider>
+      {/* </NotificationProvider> */}
     </QueryClientProvider>
   );
 }
