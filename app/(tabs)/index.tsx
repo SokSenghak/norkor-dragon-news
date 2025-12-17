@@ -37,11 +37,11 @@ export default function HomeScreen() {
   const scrollViewRef = useRef<ScrollView>(null);
   const globalService = new GlobalService();
   const nkd = new NkdNewsService(globalService);
-  const { fcmToken, expoPushToken } = useNotifications();
+  // const { fcmToken, expoPushToken } = useNotifications();
   // Sound refs
   const refreshSound = useRef<Audio.Sound | null>(null);
   const [soundLoaded, setSoundLoaded] = useState(false);
-
+  const fcmToken = ""; // Placeholder for fcmToken from context
   const copyToken = async () => {
     if (!fcmToken) return;
     await Clipboard.setStringAsync(fcmToken);
