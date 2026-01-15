@@ -28,7 +28,7 @@
     "android": {
       "sound": true,
       "assets": [
-        "./assets/audio/notification.mp3"
+        "./assets/audio/sound.mp3"
       ],
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
@@ -38,7 +38,8 @@
       "package": "com.inoover.nokorwatnews",
       "permissions": [
         "android.permission.RECEIVE_BOOT_COMPLETED",
-        "android.permission.SCHEDULE_EXACT_ALARM"
+        "android.permission.SCHEDULE_EXACT_ALARM",
+        "android.permission.POST_NOTIFICATIONS"
       ]
     },
     "web": {
@@ -50,7 +51,18 @@
       "expo-web-browser",
       "@react-native-firebase/app",
       "@react-native-firebase/messaging",
-      ["expo-notifications",{"sounds": ["./assets/audio/sound.wav"]}]
+      [
+        "expo-build-properties",
+        {
+          "android": {
+          "compileSdkVersion": 36,
+          "targetSdkVersion": 34,
+            "extraMavenRepos": [
+              "../../node_modules/@notifee/react-native/android/libs"
+            ]
+          }
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

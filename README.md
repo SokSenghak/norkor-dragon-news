@@ -18,6 +18,10 @@ npx expo start --tunnel
 rm -rf ios  
 rm -rf android  
 
+# prebuild android only
+npx expo prebuild --platform android --clean
+
+# prebuild android & ios
 npx expo prebuild --clean
 cd android && ./gradlew clean && ./gradlew :app:bundleRelease
 
@@ -47,3 +51,15 @@ import 'react-native-reanimated';
 ## run debug with devices
 
 npx expo run:android
+
+
+## SYDEN Added
+rm -rf node_modules             
+rm -rf .expo
+rm -rf android
+rm -rf ios
+rm -rf $TMPDIR/metro-*
+rm -rf $TMPDIR/haste-map-*
+
+npm install
+npx expo start -c

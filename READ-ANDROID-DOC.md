@@ -1,6 +1,6 @@
 
-## create xml folder and create file network_security_config.xml for api no https.
-
+# STEP 01
+## create xml folder in android/app/src/main/res and create file network_security_config.xml for api no https.
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
 
@@ -26,5 +26,10 @@
 
 </network-security-config>
 
-## Add this in AndroidManifest.xml in application tag
+# STEP 02
+## Add this in android/app/src/main/AndroidManifest.xml in application tag
 android:usesCleartextTraffic="true" android:networkSecurityConfig="@xml/network_security_config"
+
+# STEP 03
+## Add custom sound
+We need to copy sound.wav and paste to => android/app/src/main/res/raw/sound.wav

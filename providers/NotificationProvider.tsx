@@ -1,41 +1,52 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { initPush, listenPush, subscribeAllDevice } from '@/services/pushNotification';
+import { checkInitialNotification, initPush, listenPush, subscribeAllDevice } from '@/services/pushNotification';
 
 type NotificationContextType = {
-  fcmToken: string | null;
+	fcmToken: string | null;
 };
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
 
 export function NotificationProvider({ children }: { children: React.ReactNode }) {
-  const [fcmToken, setFcmToken] = useState<string | null>(null);
+	const [fcmToken, setFcmToken] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function setupPush() {
-      const token = await initPush();
-      if (token) {
-        setFcmToken(token);
-      }
-      await subscribeAllDevice();
-    }
+	useEffect(() => {
+		async function setupPush() {
+			// 1. Setup Channel & Permissions
+			const token = await initPush();
+			if (token) {
+				setFcmToken(token);
+			}
 
-    setupPush();
+			// 2. Subscribe to Topics
+			await subscribeAllDevice();
 
-    const unsubscribe = listenPush();
-    return unsubscribe;
-  }, []);
+			// 3. Handle Quit State (If app was closed and opened by notification)
+      		await checkInitialNotification();
+		}
 
-  return (
-    <NotificationContext.Provider value={{ fcmToken }}>
-      {children}
-    </NotificationContext.Provider>
-  );
+		setupPush();
+
+		// 4. Handle Foreground & Background listeners
+		const unsubscribe = listenPush();
+		return () => {
+			if (typeof unsubscribe === 'function') {
+				unsubscribe();
+			}
+			};
+	}, []);
+
+	return (
+		<NotificationContext.Provider value={{ fcmToken }}>
+			{children}
+		</NotificationContext.Provider>
+	);
 }
 
 export function useNotifications() {
-  const ctx = useContext(NotificationContext);
-  if (!ctx) {
-    throw new Error('useNotifications must be used inside NotificationProvider');
-  }
-  return ctx;
+	const ctx = useContext(NotificationContext);
+	if (!ctx) {
+		throw new Error('useNotifications must be used inside NotificationProvider');
+	}
+	return ctx;
 }

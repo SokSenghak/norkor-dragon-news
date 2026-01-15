@@ -267,40 +267,40 @@ export default function HomeScreen() {
           ))}
         </ScrollView>
       </View>
-       <View style={styles.tokenBox}>
-            <Text selectable style={styles.token}>
-              {fcmToken || "No FCM Token yet"}
-            </Text>
-          </View>
+      {/* <View style={styles.tokenBox}>
+        <Text selectable style={styles.token}>
+          {fcmToken || "No FCM Token yet"}
+        </Text>
+      </View> */}
 
-          <TouchableOpacity 
-            style={styles.copyBtn} 
-            onPress={copyToken}
-            disabled={!fcmToken}
-          >
-            <Text style={styles.copyText}>Copy FCM Token</Text>
-          </TouchableOpacity>
+      {/* <TouchableOpacity
+        style={styles.copyBtn}
+        onPress={copyToken}
+        disabled={!fcmToken}
+      >
+        <Text style={styles.copyText}>Copy FCM Token</Text>
+      </TouchableOpacity> */}
 
       {/* News List */}
-     <GestureHandlerRootView style={{ flex: 1 }}>
-      <FlatList
-        data={newsArticles}
-        renderItem={renderArticle}
-        keyExtractor={(item, index) => `${item.id}-${index}`} 
-        onEndReached={loadMore}
-        onEndReachedThreshold={0.4}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-        ListFooterComponent={
-          loadingMore ? (
-            <ActivityIndicator size="small" style={{ marginVertical: 10 }} />
-          ) : (
-            <View style={{ height: 10 }} />
-          )
-        }
-      />
-    </GestureHandlerRootView>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <FlatList
+          data={newsArticles}
+          renderItem={renderArticle}
+          keyExtractor={(item, index) => `${item.id}-${index}`}
+          onEndReached={loadMore}
+          onEndReachedThreshold={0.4}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+          ListFooterComponent={
+            loadingMore ? (
+              <ActivityIndicator size="small" style={{ marginVertical: 10 }} />
+            ) : (
+              <View style={{ height: 10 }} />
+            )
+          }
+        />
+      </GestureHandlerRootView>
     </View>
   );
 }
@@ -318,18 +318,18 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   logo: { width: 40, height: 40, borderRadius: 8 },
-  headerTitle: { 
+  headerTitle: {
     textAlign: "center",
-    fontSize: 18, 
-    fontWeight: "700", 
-    color: "#e0dcdcff", 
-    fontFamily: "KhmerOS" 
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#e0dcdcff",
+    fontFamily: "KhmerOS"
   },
   scrollView: { flex: 1 },
-  youtubeContainer: { 
-    width: width, 
-    height: 220, 
-    backgroundColor: "#000000" 
+  youtubeContainer: {
+    width: width,
+    height: 220,
+    backgroundColor: "#000000"
   },
   marqueeContainer: {
     width: width,          // 👈 VERY IMPORTANT
@@ -346,35 +346,35 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10, // helps readability
   },
 
-  galleryScroll: { 
-    backgroundColor: "#2B4A7C", 
+  galleryScroll: {
+    backgroundColor: "#2B4A7C",
     marginVertical: 2
   },
-  galleryContent: { 
-    paddingHorizontal: 2, 
-    paddingVertical: 4, 
-    gap: 8 
+  galleryContent: {
+    paddingHorizontal: 2,
+    paddingVertical: 4,
+    gap: 8
   },
   galleryItem: { marginRight: 2 },
-  galleryImage: { 
-    width: 180, 
-    height: 80, 
-    borderRadius: 8 
+  galleryImage: {
+    width: 180,
+    height: 80,
+    borderRadius: 8
   },
-  newsCard: { 
-    backgroundColor: "#fff", 
-    marginHorizontal: 5, 
-    marginVertical: 2, 
-    borderRadius: 8, 
-    overflow: "hidden", 
-    shadowColor: "#000", 
-    shadowOffset: { 
-      width: 0, 
-      height: 1 
-    }, 
-    shadowOpacity: 0.1, 
-    shadowRadius: 2, 
-    elevation: 2 
+  newsCard: {
+    backgroundColor: "#fff",
+    marginHorizontal: 5,
+    marginVertical: 2,
+    borderRadius: 8,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 1
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2
   },
   tokenBox: {
     backgroundColor: "#FFF",
@@ -412,7 +412,7 @@ const styles = StyleSheet.create({
   newsContent: { padding: 12 },
   newsCategory: { fontSize: 12, color: "#2B4A7C", fontWeight: "600", marginBottom: 4 },
   newsTitle: { fontSize: 14, fontWeight: "700", color: "#999999", marginBottom: 6, lineHeight: 22, fontFamily: "KhmerOS" },
-  newsDescription: { fontSize: 14, color: "#78787eff", marginBottom: 8, width: "60%",},
+  newsDescription: { fontSize: 14, color: "#78787eff", marginBottom: 8, width: "60%", },
   newsDate: { fontSize: 12, color: "#999999" },
   adBanner: { width: width - 16, height: 80, marginHorizontal: 8, marginVertical: 8, borderRadius: 8 },
   footer: { height: 20 },
