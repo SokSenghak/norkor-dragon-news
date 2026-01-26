@@ -4,14 +4,14 @@
     "slug": "norrkor-dragon-news",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/newspaper2.png",
     "scheme": "rork-app",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/images/splash-icon.png",
+      "image": "./assets/images/newspaper2.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#2B4A7C"
     },
     "ios": {
       "sound": true,
@@ -31,8 +31,8 @@
         "./assets/audio/sound.mp3"
       ],
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "foregroundImage": "./assets/images/newspaper2.png",
+        "backgroundColor": "#2B4A7C"
       },
       "googleServicesFile": "./google-services.json",
       "package": "com.inoover.nokorwatnews",

@@ -13,7 +13,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import YoutubePlayer from "react-native-youtube-iframe";
 import * as Font from "expo-font";
-import logo from "../../assets/images/icon.png";
+import logo from "../../assets/images/newspaper2.png";
 import GlobalService from "../../services/global-service";
 import NkdNewsService from "../../services/nkd-news/nkd-news";
 import { FlatList, GestureHandlerRootView, RefreshControl } from "react-native-gesture-handler";
@@ -355,9 +355,12 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     gap: 8
   },
-  galleryItem: { marginRight: 2 },
+  galleryItem: { 
+    marginRight: 2 
+  },
   galleryImage: {
-    width: 180,
+    maxWidth: 210,
+    minWidth: 570,
     height: 80,
     borderRadius: 8
   },
@@ -414,6 +417,6 @@ const styles = StyleSheet.create({
   newsTitle: { fontSize: 14, fontWeight: "700", color: "#999999", marginBottom: 6, lineHeight: 22, fontFamily: "KhmerOS" },
   newsDescription: { fontSize: 14, color: "#78787eff", marginBottom: 8, width: "60%", },
   newsDate: { fontSize: 12, color: "#999999" },
-  adBanner: { width: width - 16, height: 80, marginHorizontal: 8, marginVertical: 8, borderRadius: 8 },
+  adBanner: { height: 80, marginHorizontal: 8, marginVertical: 8, borderRadius: 8 , paddingLeft: 2, paddingRight: 2},
   footer: { height: 20 },
 });

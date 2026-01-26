@@ -28,6 +28,8 @@ export default function ListByCategoryScreen() {
   const [hasMore, setHasMore] = useState(true);
 	const [lastPost, setLastPost] = useState<any>(null);
   
+  console.log("news ==>", news);
+  
   // Load font
   useEffect(() => {
     async function loadFont() {

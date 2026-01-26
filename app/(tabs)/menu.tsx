@@ -5,7 +5,7 @@ import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "rea
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as Font from "expo-font";
 
-import logo from "../../assets/images/icon.png";
+import logo from "../../assets/images/newspaper2.png";
 import homeImg from "../../assets/images/home.png";
 import about from "../../assets/images/about.png";
 import domestic from "../../assets/images/domestic.png";
