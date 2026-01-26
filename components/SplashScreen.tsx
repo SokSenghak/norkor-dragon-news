@@ -152,7 +152,7 @@ const styles = StyleSheet.create({
   },
   enterButton: {
     backgroundColor: "#2B4A7C",
-    paddingVertical: 7,
+    paddingVertical: 14,
     paddingHorizontal: 60,
     borderRadius: 25,
     shadowColor: "#2B4A7C",

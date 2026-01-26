@@ -185,6 +185,9 @@ export default function PostDetailScreen() {
           {post.extra?.featured_image && (
             <Image source={{ uri: post.extra?.featured_image }} style={styles.articleImage} contentFit="cover" />
           )}
+          <Text style={styles.articleTitle}>
+            {post.title.rendered.replace(/&#8211;/g, "–").replace(/&#8216;/g, "‘").replace(/&#8217;/g, "’").replace(/&amp;/g, "&")}
+          </Text>
           <View style={styles.articleContent}>
            <RenderHtml
               contentWidth={width - 32}
@@ -279,7 +282,7 @@ const styles = StyleSheet.create({
   },
   articleImage: { width: "100%", height: 250 },
   articleContent: { padding: 16 },
-  articleTitle: { fontSize: 20, fontWeight: "700", color: "#1A1A1A", marginBottom: 8, lineHeight: 28 },
+  articleTitle: { fontSize: 20, fontWeight: "500", color: "red", marginBottom: 8, lineHeight: 28 , paddingHorizontal: 16, paddingTop: 16},
   articleDate: { fontSize: 12, color: "#999999", marginBottom: 16 },
   articleBody: { fontSize: 15, color: "#333333", lineHeight: 24, marginBottom: 16 },
   errorText: { fontSize: 16, color: "#999999", textAlign: "center", marginTop: 40 },
