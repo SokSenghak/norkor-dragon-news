@@ -1,12 +1,43 @@
 import { LinearGradient } from "expo-linear-gradient";
-import React from "react";
-import { Dimensions, StyleSheet, Text, View } from "react-native";
+import React, { useEffect, useRef } from "react";
+import {
+  Dimensions,
+  StyleSheet,
+  Text,
+  View,
+  Animated,
+} from "react-native";
 
 const { width, height } = Dimensions.get("window");
 
-export default function SplashScreen() {
+interface SplashScreenProps {
+  duration?: number;
+  onFinish?: () => void;
+}
+
+export default function SplashScreen({
+  duration = 3500, // ⏱ wait time (ms)
+  onFinish,
+}: SplashScreenProps) {
+  const opacity = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      // fade out
+      Animated.timing(opacity, {
+        toValue: 0,
+        duration: 600,
+        useNativeDriver: true,
+      }).start(() => {
+        onFinish?.();
+      });
+    }, duration);
+
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
-    <View style={styles.container}>
+    <Animated.View style={[styles.container, { opacity }]}>
       <LinearGradient
         colors={["#E8E5DD", "#F5F2EA", "#FFFFFF"]}
         style={styles.gradient}
@@ -22,7 +53,7 @@ export default function SplashScreen() {
               <Text style={styles.logoText}>🐉</Text>
             </LinearGradient>
           </View>
-          
+
           <Text style={styles.appTitle}>នគរព្រះខ័ន ព័ត៌មាន</Text>
           <Text style={styles.appSubtitle}>ព័ត៌មានជាតិ-អន្តរជាតិ-ពាណិជ្ជកម្ម</Text>
           <Text style={styles.appSubtitle}>អន្តរជាតិជាតិភាគតាម សម្រាប់ប្រជាពលរដ្ឋ</Text>
@@ -42,7 +73,7 @@ export default function SplashScreen() {
           </View>
         </View>
       </LinearGradient>
-    </View>
+    </Animated.View>
   );
 }
 

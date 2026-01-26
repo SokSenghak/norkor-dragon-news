@@ -34,7 +34,7 @@ function RootLayoutNav() {
 // ----------------------------------------------------
 export default function RootLayout() {
   const [appReady, setAppReady] = useState(false);
-
+  const [showSplash, setShowSplash] = useState(true);
   useEffect(() => {
     const prepare = async () => {
       try {
@@ -49,9 +49,15 @@ export default function RootLayout() {
     prepare();
   }, []);
 
-  if (!appReady) {
-    return <SplashScreenComponent />;
-  }
+  
+if (showSplash || !appReady) {
+  return (
+    <SplashScreenComponent
+      duration={25000} // ⏱ adjust here
+      onFinish={() => setShowSplash(false)}
+    />
+  );
+}
 
   return (
     <QueryClientProvider client={queryClient}>
