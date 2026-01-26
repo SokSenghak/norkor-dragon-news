@@ -1,0 +1,5 @@
+/* Core CSS required for Ionic components to work properly */
+@import "@ionic/angular/css/core.css";
+@import url('https://fonts.googleapis.com/css2?family=Moul&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Moulpali&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Freehand&family=Moulpali&family=Noto+Serif+Khmer:wght@100..900&family=Odor+Mean+Chey&display=swap');

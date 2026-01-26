@@ -1,5 +1,5 @@
 import { Image } from "expo-image";
-import { Stack, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -10,7 +10,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import YoutubePlayer from "react-native-youtube-iframe";
 import * as Font from "expo-font";
 import logo from "../../assets/images/newspaper2.png";
@@ -19,8 +18,6 @@ import NkdNewsService from "../../services/nkd-news/nkd-news";
 import { FlatList, GestureHandlerRootView, RefreshControl } from "react-native-gesture-handler";
 import AutoMarqueeRepeat from "../../components/AutoMarqueeRepeat";
 import { Audio } from "expo-av";
-import { useNotifications } from "@/contexts/NotificationContext";
-import * as Clipboard from "expo-clipboard";
 
 const { width } = Dimensions.get("window");
 
@@ -41,13 +38,6 @@ export default function HomeScreen() {
   // Sound refs
   const refreshSound = useRef<Audio.Sound | null>(null);
   const [soundLoaded, setSoundLoaded] = useState(false);
-  const fcmToken = ""; // Placeholder for fcmToken from context
-  const copyToken = async () => {
-    if (!fcmToken) return;
-    await Clipboard.setStringAsync(fcmToken);
-    alert("Copied to clipboard!");
-  };
-
   // Load sound once on mount
   useEffect(() => {
     const loadSound = async () => {
@@ -163,24 +153,27 @@ export default function HomeScreen() {
     setLoadingMore(false);
   };
 
-  // Auto scroll ads horizontally
   useEffect(() => {
     let position = 0;
+    const speed = 1; // 🔥 smaller = slower, bigger = faster
+    const imageWidth = width + 170; // must match your Image width
+    const totalWidth = adsImages.length * imageWidth;
     const interval = setInterval(() => {
-      position += 1;
-      scrollViewRef.current?.scrollTo({ x: position, animated: false });
-      if (position > adsImages.length * 150) position = 0;
-    }, 16);
+      position += speed;
+
+      if (position >= totalWidth) {
+        position = 0;
+        scrollViewRef.current?.scrollTo({ x: 0, animated: false });
+        return;
+      }
+      scrollViewRef.current?.scrollTo({
+        x: position,
+        animated: false,
+      });
+    }, 16); // ~60fps
+
     return () => clearInterval(interval);
   }, [adsImages]);
-
-  if (!fontsLoaded) {
-    return (
-      <SafeAreaView >
-        <Text>Loading...</Text>
-      </SafeAreaView>
-    );
-  }
 
   const renderArticle = ({ item, index }: any) => (
     <View key={item.id} style={styles.newsCard}>
@@ -267,20 +260,7 @@ export default function HomeScreen() {
           ))}
         </ScrollView>
       </View>
-      {/* <View style={styles.tokenBox}>
-        <Text selectable style={styles.token}>
-          {fcmToken || "No FCM Token yet"}
-        </Text>
-      </View> */}
-
-      {/* <TouchableOpacity
-        style={styles.copyBtn}
-        onPress={copyToken}
-        disabled={!fcmToken}
-      >
-        <Text style={styles.copyText}>Copy FCM Token</Text>
-      </TouchableOpacity> */}
-
+     
       {/* News List */}
       <GestureHandlerRootView style={{ flex: 1 }}>
         <FlatList
