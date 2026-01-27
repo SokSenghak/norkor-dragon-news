@@ -32,7 +32,7 @@ export async function initPush() {
 
     const token = await messaging().getToken();
     // Alert.alert("token: " + token) // Useful for debugging, remove for production
-    console.log('🔥 FCM TOKEN:', token);
+    // console.log('🔥 FCM TOKEN:', token);
 
     return token;
 }

@@ -5,7 +5,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import React, { useEffect, useState } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
-import SplashScreenComponent from '@/components/SplashScreen';
+import SplashScreenComponent from './(tabs)/SplashScreen';
 import { NotificationProvider } from '@/providers/NotificationProvider';
 
 SplashScreen.preventAutoHideAsync();

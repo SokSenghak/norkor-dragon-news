@@ -38,6 +38,7 @@ export default function HomeScreen() {
   // Sound refs
   const refreshSound = useRef<Audio.Sound | null>(null);
   const [soundLoaded, setSoundLoaded] = useState(false);
+  // alert("Welcome to Norkor Dragon News App!");
   // Load sound once on mount
   useEffect(() => {
     const loadSound = async () => {
@@ -315,7 +316,7 @@ const styles = StyleSheet.create({
     width: width,          // 👈 VERY IMPORTANT
     overflow: "hidden",
     backgroundColor: "#2B4A7C",
-    paddingVertical: 6,
+    // paddingVertical: 6,
   },
 
   marqueeText: {
