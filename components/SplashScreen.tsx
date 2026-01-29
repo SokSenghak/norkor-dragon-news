@@ -1,8 +1,7 @@
 import { LinearGradient } from "expo-linear-gradient";
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState } from "react";
 import { useFonts } from "expo-font";
 import { useRouter } from "expo-router";
-import logoImage from "../../assets/images/newspaper2.png";
 import {
   Dimensions,
   StyleSheet,
@@ -14,20 +13,27 @@ import {
 
 const { width, height } = Dimensions.get("window");
 
+// ✅ expo-image requires require()
+const logoImage = require("../assets/images/newspaper2.png");
+
 interface SplashScreenProps {
-  duration?: number; // optional auto-hide
-  onFinish?: () => void; // callback to notify RootLayout
+  duration?: number;
+  onFinish?: () => void;
 }
 
-export default function SplashScreen({ duration = 5000, onFinish }: SplashScreenProps) {
+export default function SplashScreen({
+  duration = 5000,
+  onFinish,
+}: SplashScreenProps) {
   const router = useRouter();
+
   const [fontsLoaded] = useFonts({
-    Moulpali: require("../../assets/fonts/Moulpali-Regular.ttf"),
+    Moulpali: require("../assets/fonts/Moulpali-Regular.ttf"),
   });
 
   const [touchEnabled, setTouchEnabled] = useState(true);
 
-  // ✅ Auto hide after duration
+  // Auto hide splash
   useEffect(() => {
     if (!fontsLoaded) return;
 
@@ -41,7 +47,7 @@ export default function SplashScreen({ duration = 5000, onFinish }: SplashScreen
   const handlePress = () => {
     if (!touchEnabled) return;
     setTouchEnabled(false);
-    onFinish?.(); // RootLayout will handle navigation
+    onFinish?.();
   };
 
   if (!fontsLoaded) return null;
@@ -51,19 +57,24 @@ export default function SplashScreen({ duration = 5000, onFinish }: SplashScreen
       colors={["#E8E5DD", "#F5F2EA", "#FFFFFF"]}
       style={styles.container}
     >
-      {/* LOGO */}
+      {/* LOGO + TEXT */}
       <View style={styles.logoContainer}>
-        <Image source={logoImage} style={styles.logo} resizeMode="contain" />
+        <Image
+          source={logoImage}
+          style={styles.logo}
+          contentFit="contain"
+          transition={300}
+        />
 
-        {/* KHMER TEXT */}
         <Text style={styles.khmerText}>នគរដ្រេហ្គន​ ព័ត៌មានជាតិ-</Text>
         <Text style={styles.khmerText}>អន្តរជាតិទាន់ហេតុការណ៍</Text>
         <Text style={styles.khmerText}>សម្បូរបែប</Text>
-        <Text style={styles.khmerText}>ប្រកបដោយក្រមសីលធម៍</Text>
+        <Text style={styles.khmerText}>ប្រកបដោយក្រមសីលធម៌</Text>
         <Text style={styles.khmerText}>និងវិជ្ជាជិវៈដោយផ្ទាល់</Text>
 
-        {/* ENGLISH TEXT */}
-        <Text style={styles.enText}>Nokor Dragon Breaking National News</Text>
+        <Text style={styles.enText}>
+          Nokor Dragon Breaking National News
+        </Text>
         <Text style={styles.enText}>& International News</Text>
       </View>
 
@@ -105,10 +116,11 @@ const styles = StyleSheet.create({
     color: "#4A5568",
   },
   enText: {
-    fontSize: 14,
+    fontSize: 16,
     lineHeight: 20,
     textAlign: "center",
     color: "#718096",
+    fontFamily: "Moulpali",
   },
   button: {
     backgroundColor: "#2B4A7C",

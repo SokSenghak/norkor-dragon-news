@@ -10,7 +10,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import YoutubePlayer from "react-native-youtube-iframe";
 import GlobalService from "../../services/global-service";
 import NkdNewsService from "../../services/nkd-news/nkd-news";
@@ -120,41 +119,51 @@ export default function VideosScreen() {
     setPlaying(true);
   };
 
-  const renderVideoItem = ({ item, index }: any) => (
-    <View>
-      {index % 3 === 2 && adsImages.length > 0 && (
+  const renderVideoItem = ({ item, index }: any) => {
+    // which ad should be shown at this position
+    const adIndex =
+      adsImages.length > 0
+        ? Math.floor(index / 3) % adsImages.length
+        : 0;
+
+    return (
+      <View>
+        {/* Ad after every 3 items */}
+        {index % 3 === 2 && adsImages.length > 0 && (
+          <TouchableOpacity
+            onPress={() => router.push("/videos")}
+            style={{ alignItems: "center" }}
+          >
+            <Image
+              source={{ uri: adsImages[adIndex] }}
+              style={styles.adBanner}
+              contentFit="cover"
+            />
+          </TouchableOpacity>
+        )}
+
+        {/* Video item */}
         <TouchableOpacity
-          onPress={() => router.push("/videos")}
-          style={{ alignItems: "center" }}
+          style={styles.videoItem}
+          onPress={() => handleVideoSelect(item.videoId)}
         >
           <Image
-            source={{ uri: adsImages[index % adsImages.length] }}
-            style={styles.adBanner}
+            source={{ uri: item.thumbnails_high }}
+            style={styles.thumbnail}
             contentFit="cover"
           />
+          <View style={styles.videoInfo}>
+            <Text style={styles.videoTitle} numberOfLines={2}>
+              {item.title}
+            </Text>
+            <Text style={styles.videoStats}>
+              {new Date(item.publishedAt).toLocaleDateString()}
+            </Text>
+          </View>
         </TouchableOpacity>
-      )}
-
-      <TouchableOpacity
-        style={styles.videoItem}
-        onPress={() => handleVideoSelect(item.videoId)}
-      >
-        <Image
-          source={{ uri: item.thumbnails_high }}
-          style={styles.thumbnail}
-          contentFit="cover"
-        />
-        <View style={styles.videoInfo}>
-          <Text style={styles.videoTitle} numberOfLines={2}>
-            {item.title}
-          </Text>
-          <Text style={styles.videoStats}>
-            {new Date(item.publishedAt).toLocaleDateString()}
-          </Text>
-        </View>
-      </TouchableOpacity>
-    </View>
-  );
+      </View>
+    );
+  };
 
   return (
     <View style={styles.container}>

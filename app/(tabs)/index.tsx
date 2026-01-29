@@ -176,38 +176,57 @@ export default function HomeScreen() {
     return () => clearInterval(interval);
   }, [adsImages]);
 
-  const renderArticle = ({ item, index }: any) => (
-    <View key={item.id} style={styles.newsCard}>
-      <TouchableOpacity
-        style={{ flex: 1 }}
-        onPress={() => router.push({ pathname: "/article/[id]", params: { id: item.id } })}
-      >
-        <View style={styles.newsContent}>
-          <Text style={styles.newsTitle} numberOfLines={2}>
-            {item.title.rendered}
-          </Text>
-          <View style={{ flexDirection: "row", gap: 2, alignItems: "center" }}>
-            <Text style={styles.newsDescription} numberOfLines={3}>
+  const renderArticle = ({ item, index }: any) => {
+    // STEP 1: Should we show an ad after this item?
+    const showAd = (index + 1) % 4 === 0;
+
+    // STEP 2: Calculate which ad to show
+    const adIndex =
+      adsImages.length > 0
+        ? Math.floor(index / 4) % adsImages.length
+        : null;
+
+    return (
+      <View style={styles.newsCard}>
+        <TouchableOpacity
+          style={{ flex: 1 }}
+          onPress={() =>
+            router.push({
+              pathname: "/article/[id]",
+              params: { id: item.id },
+            })
+          }
+        >
+          <View style={styles.newsContent}>
+            <Text style={styles.newsTitle} numberOfLines={2}>
               {item.title.rendered}
             </Text>
-            <Image
-              source={{ uri: item.extra?.featured_image }}
-              style={styles.newsImage}
-              contentFit="cover"
-            />
-          </View>
-        </View>
-      </TouchableOpacity>
 
-      {index % 3 === 2 && adsImages[index % adsImages.length] && (
-        <Image
-          source={{ uri: adsImages[index % adsImages.length] }}
-          style={styles.adBanner}
-          contentFit="cover"
-        />
-      )}
-    </View>
-  );
+            <View style={{ flexDirection: "row", gap: 2, alignItems: "center" }}>
+              <Text style={styles.newsDescription} numberOfLines={3}>
+                {item.title.rendered}
+              </Text>
+
+              <Image
+                source={{ uri: item.extra?.featured_image }}
+                style={styles.newsImage}
+                contentFit="cover"
+              />
+            </View>
+          </View>
+        </TouchableOpacity>
+
+        {/* STEP 4: Render ad */}
+        {showAd && adIndex !== null && (
+          <Image
+            source={{ uri: adsImages[adIndex] }}
+            style={styles.adBanner}
+            contentFit="cover"
+          />
+        )}
+      </View>
+    );
+  };
 
   function setPlaying(arg0: boolean): void {
     throw new Error("Function not implemented.");
@@ -240,23 +259,25 @@ export default function HomeScreen() {
 
       {/* Marquee + Gallery */}
       <View style={styles.marqueeContainer}>
-        <AutoMarqueeRepeat
-          text="នគរដ្រេហ្គន​ ព័ត៌មានជាតិ-អន្តរជាតិទាន់ហេតុការណ៍ សម្បូរបែប ប្រកបដោយក្រមសីលធម៍ និងវិជ្ជាជីវៈដោយផ្ទាល់"
+       <AutoMarqueeRepeat
+          text="នគរដ្រេហ្គន​ ព័ត៌មានជាតិ-អន្តរជាតិទាន់ហេតុការណ៍ សម្បូរបែប ប្រកបដោយក្រមសីលធម៌ និងវិជ្ជាជីវៈដោយផ្ទាល់"
           speed={40}
-          textStyle={{ fontFamily: "KhmerOS", fontSize: 16, color: "#e0dcdcff" }}
+          textStyle={{ fontFamily: "KhmerOS", fontSize: 16, color: "#e0dcdcff" , paddingBottom: 2}}
           containerStyle={{ backgroundColor: "#2B4A7C", paddingVertical: 6 }}
         />
         <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.galleryScroll}
-          contentContainerStyle={styles.galleryContent}
-          ref={scrollViewRef}
-          scrollEnabled={false}
-        >
+            ref={scrollViewRef}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            scrollEnabled={false}
+            contentContainerStyle={{ alignItems: "center" }}
+          >
           {fullList.map((uri, index) => (
-            <TouchableOpacity key={index} style={styles.galleryItem}>
-              <Image source={{ uri }} style={styles.galleryImage} />
+            <TouchableOpacity key={index} style={{ marginRight: 10 }}>
+              <Image
+                source={{ uri }}
+                style={{ width: 500, height: 80, borderRadius: 10 }}
+              />
             </TouchableOpacity>
           ))}
         </ScrollView>
@@ -313,10 +334,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#000000"
   },
   marqueeContainer: {
-    width: width,          // 👈 VERY IMPORTANT
-    overflow: "hidden",
+    marginBottom: 2,
     backgroundColor: "#2B4A7C",
-    // paddingVertical: 6,
   },
 
   marqueeText: {

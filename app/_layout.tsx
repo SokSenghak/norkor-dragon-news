@@ -5,7 +5,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import React, { useEffect, useState } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
-import SplashScreenComponent from './(tabs)/SplashScreen';
+import SplashScreenComponent from '@/components/SplashScreen';
 import { NotificationProvider } from '@/providers/NotificationProvider';
 
 SplashScreen.preventAutoHideAsync();
@@ -38,7 +38,6 @@ export default function RootLayout() {
   useEffect(() => {
     const prepare = async () => {
       try {
-        // fake loading (splash)
         await new Promise(resolve => setTimeout(resolve, 2500));
       } finally {
         setAppReady(true);
