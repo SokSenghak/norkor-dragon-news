@@ -44,7 +44,7 @@ export default function PostDetailScreen() {
   const [loading, setLoading] = useState(true);
   const nkd = new NkdNewsService(globalService);
   const [adsImages, setAdsImages] = useState<string[]>([]);
-  const scrollViewRef = useRef(null);
+  const scrollViewRef = useRef<ScrollView | null>(null);
   const [fullList, setFullList] = useState([]);
   const postid = id;
   const [featuredImage, setFeaturedImage] = useState<string | null>(null);
@@ -109,7 +109,6 @@ export default function PostDetailScreen() {
           categoryObjects: mappedCategories, // 👈 new field
           categoryTitles: mappedCategories.map(c => c.title), // 👈 optional shortcut
         };
-        console.log(" Enriched Post:", enrichedPost);
         
         setPost(enrichedPost);
       }
@@ -239,7 +238,7 @@ export default function PostDetailScreen() {
          <AutoMarqueeRepeat
           text="នគរដ្រេហ្គន​ ព័ត៌មានជាតិ-អន្តរជាតិទាន់ហេតុការណ៍ សម្បូរបែប ប្រកបដោយក្រមសីលធម៌ និងវិជ្ជាជីវៈដោយផ្ទាល់"
           speed={40}
-          textStyle={{ fontFamily: "KhmerOS", fontSize: 16, color: "#e0dcdcff" }}
+          textStyle={{ fontFamily: "KhmerOS", fontSize: 14, color: "#e0dcdcff" }}
           containerStyle={{ backgroundColor: "#2B4A7C", paddingVertical: 6 }}
         />
 

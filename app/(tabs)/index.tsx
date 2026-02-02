@@ -18,6 +18,7 @@ import NkdNewsService from "../../services/nkd-news/nkd-news";
 import { FlatList, GestureHandlerRootView, RefreshControl } from "react-native-gesture-handler";
 import AutoMarqueeRepeat from "../../components/AutoMarqueeRepeat";
 import { Audio } from "expo-av";
+import { BottomTabs } from "react-native-screens";
 
 const { width } = Dimensions.get("window");
 
@@ -111,17 +112,6 @@ export default function HomeScreen() {
     fetchLastVideo();
   }, []);
 
-  useEffect(() => {
-    const init = async () => {
-      await Font.loadAsync({
-        KhmerOS: require("../../assets/fonts/KhmerOS_muollight.ttf"),
-      });
-      setFontsLoaded(true);
-      loadPosts(1);
-    };
-    init();
-  }, []);
-
   const loadPosts = async (pageNumber: number) => {
     try {
       const res = await nkd.getAll({ per_page: 10, page: pageNumber });
@@ -153,7 +143,16 @@ export default function HomeScreen() {
     await playSound(); // play preloaded sound
     setLoadingMore(false);
   };
-
+  useEffect(() => {
+    const init = async () => {
+      await Font.loadAsync({
+        KhmerOS: require("../../assets/fonts/KhmerOS_muollight.ttf"),
+      });
+      setFontsLoaded(true);
+      loadPosts(1);
+    };
+    init();
+  }, []);
   useEffect(() => {
     let position = 0;
     const speed = 1; // 🔥 smaller = slower, bigger = faster
@@ -259,12 +258,29 @@ export default function HomeScreen() {
 
       {/* Marquee + Gallery */}
       <View style={styles.marqueeContainer}>
-       <AutoMarqueeRepeat
+        <AutoMarqueeRepeat
           text="នគរដ្រេហ្គន​ ព័ត៌មានជាតិ-អន្តរជាតិទាន់ហេតុការណ៍ សម្បូរបែប ប្រកបដោយក្រមសីលធម៌ និងវិជ្ជាជីវៈដោយផ្ទាល់"
           speed={40}
-          textStyle={{ fontFamily: "KhmerOS", fontSize: 16, color: "#e0dcdcff" , paddingBottom: 2}}
-          containerStyle={{ backgroundColor: "#2B4A7C", paddingVertical: 6 }}
+          textStyle={{
+            fontFamily: "KhmerOS",
+            fontSize: 14,
+
+            // 🔥 CRITICAL FIXES
+            lineHeight: 26,
+            paddingBottom: 6,
+            includeFontPadding: true,
+
+            color: "#e0dcdcff",
+          }}
+          containerStyle={{
+            backgroundColor: "#2B4A7C",
+            marginTop: -15,
+            // 🔥 give vertical breathing room
+            paddingTop: 6,
+            paddingBottom: 8,
+          }}
         />
+
         <ScrollView
             ref={scrollViewRef}
             horizontal
@@ -276,7 +292,7 @@ export default function HomeScreen() {
             <TouchableOpacity key={index} style={{ marginRight: 10 }}>
               <Image
                 source={{ uri }}
-                style={{ width: 500, height: 80, borderRadius: 10 }}
+                style={{ minWidth: 600, height: 80, borderRadius: 10 , paddingTop: 0, paddingBottom: 0}}
               />
             </TouchableOpacity>
           ))}
@@ -319,13 +335,12 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     gap: 12,
   },
-  logo: { width: 40, height: 40, borderRadius: 8 },
+  logo: { width: 30, height: 30, borderRadius: 8 },
   headerTitle: {
+    fontFamily: "KhmerOS",
     textAlign: "center",
-    fontSize: 18,
-    fontWeight: "700",
+    fontSize: 14,
     color: "#e0dcdcff",
-    fontFamily: "KhmerOS"
   },
   scrollView: { flex: 1 },
   youtubeContainer: {
@@ -414,7 +429,7 @@ const styles = StyleSheet.create({
   newsImage: { width: "40%", borderRadius: 8, height: 100 },
   newsContent: { padding: 12 },
   newsCategory: { fontSize: 12, color: "#2B4A7C", fontWeight: "600", marginBottom: 4 },
-  newsTitle: { fontSize: 14, fontWeight: "700", color: "#999999", marginBottom: 6, lineHeight: 22, fontFamily: "KhmerOS" },
+  newsTitle: {fontFamily: "KhmerOS", fontSize: 14, color: "#999999", marginBottom: 6, lineHeight: 22 },
   newsDescription: { fontSize: 14, color: "#78787eff", marginBottom: 8, width: "60%", },
   newsDate: { fontSize: 12, color: "#999999" },
   adBanner: { height: 80, marginHorizontal: 8, marginVertical: 8, borderRadius: 8 , paddingLeft: 2, paddingRight: 2},
