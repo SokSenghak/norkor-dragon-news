@@ -2,10 +2,10 @@ import { Image } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
 import { ChevronLeft, Share2 } from "lucide-react-native";
 import React, { useEffect, useRef, useState } from "react";
-import RenderHtml from "react-native-render-html";
+import { WebView } from "react-native-webview";
+
 import {
   ActivityIndicator,
-  Animated,
   Dimensions,
   Platform,
   ScrollView,
@@ -25,16 +25,13 @@ const { width } = Dimensions.get("window");
 interface Post {
   guid: any;
   id: number;
-  categoryTitles: string[]; // new field for category titles
-  categoryObjects: any[]; // new field for full category objects
-  categories: number[]; // original category IDs
+  categoryTitles: string[];
+  categoryObjects: any[];
+  categories: number[];
   title: { rendered: string };
   content: { rendered: string };
   date: string;
   extra?: { featured_image?: string };
-  gallery?: string[]; // optional array of image URLs
-  ads?: string[]; // optional array of ad URLs
-  breaking?: string[]; // optional breaking news items
 }
 
 export default function PostDetailScreen() {
@@ -45,10 +42,9 @@ export default function PostDetailScreen() {
   const nkd = new NkdNewsService(globalService);
   const [adsImages, setAdsImages] = useState<string[]>([]);
   const scrollViewRef = useRef<ScrollView | null>(null);
-  const [fullList, setFullList] = useState([]);
-  const postid = id;
+  const [fullList, setFullList] = useState<string[]>([]);
   const [featuredImage, setFeaturedImage] = useState<string | null>(null);
-
+  const [webViewHeight, setWebViewHeight] = useState(0);
 
   const categories = [
     { title: 'ព័ត៌មានជាតិ', url: '/list/66', id: "66" },
@@ -81,7 +77,25 @@ export default function PostDetailScreen() {
       setAdsImages(imgs);
     }
   };
-  
+
+  useEffect(() => {
+    async function fetchPost() {
+      setLoading(true);
+      const data = await globalService.APIGetPostByID(Number(id));
+      if (data) {
+        const mappedCategories = mapPostCategories(data.categories);
+        const enrichedPost = {
+          ...data,
+          categoryObjects: mappedCategories,
+          categoryTitles: mappedCategories.map(c => c.title),
+        };
+        setPost(enrichedPost);
+      }
+      setLoading(false);
+    }
+    fetchPost();
+  }, [id]);
+
   const extractAdImages = (html: string) => {
     const regex = /<img[^>]+src="([^">]+)"/g;
     const images: string[] = [];
@@ -95,74 +109,6 @@ export default function PostDetailScreen() {
   useEffect(() => {
     loadAds();
   }, []);
-  
-  useEffect(() => {
-    async function fetchPost() {
-      setLoading(true);
-      const data = await globalService.APIGetPostByID(Number(id));
-      if (data) {
-        // STEP 1: Map category IDs to category objects
-        const mappedCategories = mapPostCategories(data.categories);
-        // STEP 2: Enrich post object
-        const enrichedPost = {
-          ...data,
-          categoryObjects: mappedCategories, // 👈 new field
-          categoryTitles: mappedCategories.map(c => c.title), // 👈 optional shortcut
-        };
-        
-        setPost(enrichedPost);
-      }
-      setLoading(false);
-    }
-    fetchPost();
-  }, [id]);
-
-  const handleShare = async () => {
-    try {
-      if (!post) return;
-
-      const title = post?.title?.rendered;
-      const link = post?.guid?.rendered ;
-      const image = post.extra?.featured_image;
-      // Social preview will be generated from LINK metadata
-      const message = `${title}\n\nអានបន្ត៖\n${link}`;
-
-      if (Platform.OS === "web") {
-        alert("Sharing only works on mobile.");
-        return;
-      }
-
-      await Share.share({
-        title,
-        message,
-        url: link,
-      });
-
-    } catch (err) {
-      console.error("Share error:", err);
-    }
-  };
-  let htmlImageIndex = 0;
-
-  const renderers = {
-    img: ({ tnode }: any) => {
-      const uri = tnode.attributes.src;
-      const isFirstImage = htmlImageIndex === 0;
-
-      htmlImageIndex++;
-
-      return (
-        <Image
-          source={{ uri }}
-          contentFit={isFirstImage ? "contain" : "cover"}
-          style={[
-            styles.htmlImage,
-            isFirstImage && styles.firstHtmlImage,
-          ]}
-        />
-      );
-    },
-  };
 
   useEffect(() => {
     setFullList([...adsImages, ...adsImages]);
@@ -172,23 +118,18 @@ export default function PostDetailScreen() {
     let position = 0;
     const interval = setInterval(() => {
       position += 1;
-      scrollViewRef.current?.scrollTo({
-        x: position,
-        animated: false,
-      });
-      if (position > adsImages.length * 150) {
-        position = 0;
-      }
+      scrollViewRef.current?.scrollTo({ x: position, animated: false });
+      if (position > adsImages.length * 150) position = 0;
     }, 10);
     return () => clearInterval(interval);
   }, [adsImages]);
 
   useEffect(() => {
-    if (!postid) return;
-    getPostImage(postid);
-  }, [postid]);
+    if (!id) return;
+    getPostImage(id);
+  }, [id]);
 
-  const getPostImage = async (postid: string | string[]) => {
+  const getPostImage = async (postid: string) => {
     try {
       const res = await fetch(
         `http://nkdnews.com/wp-json/wp/v2/posts/${postid}?_embed`
@@ -199,6 +140,24 @@ export default function PostDetailScreen() {
       setFeaturedImage(image);
     } catch (error) {
       console.error("Fetch image error:", error);
+    }
+  };
+
+  const handleShare = async () => {
+    try {
+      if (!post) return;
+
+      const title = post?.title?.rendered;
+      const link = post?.guid?.rendered;
+
+      await Share.share({
+        title,
+        message: `${title}\n\n${link}`,
+        url: link,
+      });
+
+    } catch (err) {
+      console.error("Share error:", err);
     }
   };
 
@@ -213,32 +172,66 @@ export default function PostDetailScreen() {
   if (!post) {
     return (
       <View style={styles.centered}>
-        <Text style={styles.errorText}>Post not found</Text>
+        <Text>Post not found</Text>
       </View>
     );
   }
 
+  const htmlContent = `
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+      body { margin: 0; padding: 10px; font-family: Arial; color: #333; }
+      img { max-width: 100%; height: auto; margin: 10px 0; border-radius: 8px; }
+      iframe { width: 100%; height: 220px; border-radius: 8px; }
+    </style>
+  </head>
+  <body>
+    ${post.content.rendered}
+    <script>
+      function sendHeight() {
+        const height = document.body.scrollHeight;
+        window.ReactNativeWebView.postMessage(height);
+      }
+
+      // Initial height after load
+      window.onload = function() {
+        sendHeight();
+
+        // Update height when images finish loading
+        const imgs = document.images;
+        for (let i = 0; i < imgs.length; i++) {
+          imgs[i].onload = sendHeight;
+        }
+      }
+
+      window.addEventListener('resize', sendHeight);
+    </script>
+  </body>
+</html>
+`;
+
+
   return (
     <View style={styles.container}>
       <View style={styles.headerButtons}>
-        <TouchableOpacity 
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <ChevronLeft size={22} color="#FFFFFF" />
+        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+          <ChevronLeft size={22} color="#FFF" />
           <Text style={styles.backButtonText}>ត្រលប់</Text>
         </TouchableOpacity>
+
         <TouchableOpacity style={styles.shareButton} onPress={handleShare}>
-          <Share2 size={20} color="#FFFFFF" />
+          <Share2 size={20} color="#FFF" />
           <Text style={styles.shareButtonText}>ចែករំលែក</Text>
         </TouchableOpacity>
       </View>
-      
+
       <View style={styles.marqueeContainerAds}>
-         <AutoMarqueeRepeat
-          text="នគរដ្រេហ្គន​ ព័ត៌មានជាតិ-អន្តរជាតិទាន់ហេតុការណ៍ សម្បូរបែប ប្រកបដោយក្រមសីលធម៌ និងវិជ្ជាជីវៈដោយផ្ទាល់"
+        <AutoMarqueeRepeat
+          text="នគរដ្រេហ្គន ព័ត៌មានជាតិ-អន្តរជាតិ"
           speed={40}
-          textStyle={{ fontFamily: "KhmerOS", fontSize: 14, color: "#e0dcdcff" }}
+          textStyle={{ fontSize: 14, color: "#fff" }}
           containerStyle={{ backgroundColor: "#2B4A7C", paddingVertical: 6 }}
         />
 
@@ -247,92 +240,57 @@ export default function PostDetailScreen() {
           horizontal
           showsHorizontalScrollIndicator={false}
           scrollEnabled={false}
-          contentContainerStyle={{ alignItems: "center" }}
         >
           {fullList.map((uri, index) => (
-            <TouchableOpacity key={index} style={{ marginRight: 10 }}>
-              <Image
-                source={{ uri }}
-                style={{ width: 190, height: 80, borderRadius: 10 }}
-              />
-            </TouchableOpacity>
+            <Image
+              key={index}
+              source={{ uri }}
+              style={{ width: 190, height: 80, borderRadius: 10, marginRight: 10 }}
+            />
           ))}
         </ScrollView>
       </View>
+
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        <View style={styles.articleContainer}>
-          {featuredImage && (
-            <Image source={{ uri: featuredImage }} style={styles.articleImage} contentFit="cover" />
-          )}
-          <Text style={styles.category}>
-            {post?.categoryTitles?.length
-              ? post.categoryTitles.join(" • ")
-              : "ព័ត៌មាន"}
-          </Text>
-          <Text style={styles.articleTitle}>
-            {post.title.rendered.replace(/&#8211;/g, "–").replace(/&#8216;/g, "‘").replace(/&#8217;/g, "’").replace(/&amp;/g, "&")}
-          </Text>
-          <View style={styles.articleContent}>
-            <RenderHtml
-              contentWidth={width - 32}
-              source={{ html: post.content.rendered }}
-              renderers={renderers}
-              tagsStyles={{
-                p: { fontSize: 16, lineHeight: 24, marginBottom: 12, color: "#333" },
-                a: { color: "#2B4A7C" },
-              }}
-            />
-          </View>
-        </View>
-        <View style={styles.footer} />
+        {featuredImage && (
+          <Image
+            source={{ uri: featuredImage }}
+            style={{ width: "100%", height: 250 }}
+            contentFit="cover"
+          />
+        )}
+        <Text style={styles.category}>
+          {post?.categoryTitles?.length
+            ? post.categoryTitles.join(" • ")
+            : "ព័ត៌មាន"}
+        </Text>
+        <Text style={styles.articleTitle}>
+          {post.title.rendered
+            .replace(/&#8211;/g, "–")
+            .replace(/&#8216;/g, "‘")
+            .replace(/&#8217;/g, "’")
+            .replace(/&amp;/g, "&")}
+        </Text>
+
+        {/* WebView with dynamic height */}
+        <WebView
+          originWhitelist={["*"]}
+          source={{ html: htmlContent }}
+          style={{ width: "100%", height: 5000, backgroundColor: "#FFF" }}
+          javaScriptEnabled
+          domStorageEnabled
+          scrollEnabled={false} 
+        />
+
       </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { 
-    flex: 1, 
-    backgroundColor: "#2B4A7C" 
-  },
-  htmlImage: {
-    marginVertical: 8,
-    borderRadius: 8,
-    width: "100%",
-    height: 150,
-  },
-  firstHtmlImage: {
-    marginVertical: 16,
-    borderRadius: 12,
-    height: 100,
-  },
-  galleryContentads: { 
-    paddingHorizontal: 2, 
-    paddingVertical: 4,  
-  },
-  marqueeContainerAds: { 
-    backgroundColor: "#2B4A7C",
-  },
-  backButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    borderWidth: 1,
-    borderColor: "#FFFFFF",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
-  },
-  backButtonText: {
-    color: "#FFFFFF",
-    fontSize: 15,
-    fontWeight: "600",
-  },
-  centered: { 
-    flex: 1, 
-    justifyContent: "center", 
-    alignItems: "center" 
-  },
+  container: { flex: 1 },
+  scrollView: { flex: 1 },
+  centered: { flex: 1, justifyContent: "center", alignItems: "center" },
   headerButtons: {
     paddingTop: Platform.OS === "ios" ? 60 : 30,
     flexDirection: "row",
@@ -340,47 +298,28 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     backgroundColor: "#2B4A7C",
+  },
+  category: { fontSize: 14, fontWeight: "300", color: "red", paddingHorizontal: 16, paddingTop: 16 },
+  articleTitle: { fontSize: 18, fontWeight: "bold", color: "red", paddingHorizontal: 16, paddingBottom: 16 },
+  backButton: {
+    flexDirection: "row",
     alignItems: "center",
-  },
-  shareButton: {
-    flexDirection: "row", 
-    alignItems: "center", 
     borderWidth: 1,
-    borderColor: "#FFFFFF",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
+    borderColor: "#FFF",
+    padding: 6,
+    borderRadius: 8,
     gap: 6,
-    borderRadius: 8
   },
-  shareButtonText: { fontSize: 14, fontWeight: "600", color: "#FFFFFF" },
-  scrollView: { flex: 1 },
-  marqueeContainer: { backgroundColor: "#2B4A7C", paddingVertical: 10, overflow: "hidden" },
-  marqueeText: { fontSize: 14, color: "#FFFFFF", fontWeight: "500" ,fontFamily: "KhmerOS"},
-  galleryContent: { paddingHorizontal: 8, paddingVertical: 12, gap: 8 },
-  galleryItem: { marginRight: 8 },
-  galleryImage: { width: 180, height: 80, borderRadius: 8 },
-  adBanner: { width: Dimensions.get("window").width - 16, height: 80, marginHorizontal: 8, marginVertical: 8, borderRadius: 8 },
-  articleContainer: { 
-    backgroundColor: "#FFFFFF", 
-    marginHorizontal: 8, 
-    marginVertical: 8, 
-    borderRadius: 8, 
-    overflow: "hidden", 
-    shadowColor: "#000", 
-    shadowOffset: { 
-      width: 0, 
-      height: 2 
-    }, 
-    shadowOpacity: 0.1, 
-    shadowRadius: 4, 
-    elevation: 3 
+  backButtonText: { color: "#FFF" },
+  shareButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#FFF",
+    padding: 6,
+    borderRadius: 8,
+    gap: 6,
   },
-  articleImage: { width: "100%", height: 250 },
-  articleContent: { padding: 16 },
-  articleTitle: { fontSize: 20, fontWeight: "500", color: "red", marginBottom: 8, lineHeight: 28 , paddingHorizontal: 16, paddingTop: 16},
-  category: { fontSize: 14, fontWeight: "300", color: "red", paddingHorizontal: 16, paddingTop: 16},
-  articleDate: { fontSize: 12, color: "#999999", marginBottom: 16 },
-  articleBody: { fontSize: 15, color: "#333333", lineHeight: 24, marginBottom: 16 },
-  errorText: { fontSize: 16, color: "#999999", textAlign: "center", marginTop: 40 },
-  footer: { height: 20 },
+  shareButtonText: { color: "#FFF" },
+  marqueeContainerAds: { backgroundColor: "#2B4A7C" },
 });

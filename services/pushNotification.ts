@@ -1,5 +1,5 @@
 import messaging from '@react-native-firebase/messaging';
-import { Alert, Platform } from 'react-native';
+import { Alert, PermissionsAndroid, Platform } from 'react-native';
 import notifee, { AndroidImportance, EventType } from '@notifee/react-native';
 import { router } from 'expo-router';
 
@@ -16,25 +16,46 @@ const handleNotificationNavigation = (data: any) => {
     }
 };
 
-// Request permission + get FCM token
 export async function initPush() {
-    if (Platform.OS !== 'android') return;
+  try {
+    // ✅ ANDROID 13+ RUNTIME PERMISSION
+    if (Platform.OS === 'android' && Platform.Version >= 33) {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
+      );
 
+      if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+        console.log('❌ Notification permission denied');
+        return null;
+      }
+
+      console.log('✅ Notification permission granted');
+    }
+
+    // ✅ iOS or fallback permission
     await messaging().requestPermission();
 
-    // Create the channel
-    await notifee.createChannel({
+    // ✅ Create notification channel (Android)
+    if (Platform.OS === 'android') {
+      await notifee.createChannel({
         id: 'sound_channel',
         name: 'News Notifications',
-        importance: AndroidImportance.HIGH, 
-        sound: 'sound', // refers to sound.wav in res/raw
-    });
+        importance: AndroidImportance.HIGH,
+        sound: 'sound',
+      });
+    }
 
+    // ✅ Get FCM Token
     const token = await messaging().getToken();
-    // Alert.alert("token: " + token) // Useful for debugging, remove for production
-    // console.log('🔥 FCM TOKEN:', token);
+
+    console.log('🔥 FCM TOKEN:', token);
 
     return token;
+
+  } catch (e) {
+    console.log('initPush ERROR:', e);
+    return null;
+  }
 }
 
 export async function subscribeAllDevice() {
