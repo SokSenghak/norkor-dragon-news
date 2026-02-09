@@ -118,7 +118,7 @@ export default function MenuScreen() {
       icons: about,
       action: () => router.push({
         pathname: '/list/[id]',
-        params: { id: "412314", title: 'អំពី យើង (នគរ ដ្រេហ្គន)' },
+        params: { id: "412314", title: 'អំពីយើង (នគរ ដ្រេហ្គន)' },
       }),
     }
   ];
@@ -174,8 +174,8 @@ export default function MenuScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#2B4A7C" },
   header: { backgroundColor: "#2B4A7C", flexDirection: "row", alignItems: "center", paddingHorizontal: 16, paddingVertical: 12, gap: 12 },
-  logo: { width: 40, height: 40, borderRadius: 8 },
-  headerTitle: { fontSize: 18, fontWeight: "700", color: "#FFFFFF" },
+  logo: { width: 30, height: 30, borderRadius: 8 },
+  headerTitle: {fontFamily: "KhmerOS", fontSize: 14, color: "#FFFFFF" },
   scrollView: { flex: 1 },
   menuItem: { 
     backgroundColor: "#2B4A7C", 
@@ -188,7 +188,13 @@ const styles = StyleSheet.create({
     borderRadius: 12, 
     shadowColor: "#000", 
     shadowOffset: { 
-      width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 2, elevation: 1, gap: 16 },
+      width: 0, height: 1 
+    }, 
+    shadowOpacity: 0.05, 
+    shadowRadius: 2, 
+    elevation: 1, 
+    gap: 16 
+  },
   iconContainer: { width: 48, height: 48, borderRadius: 24, backgroundColor: "#F0F4F8", justifyContent: "center", alignItems: "center" },
   menuText: { fontSize: 15, fontWeight: "600", color: "#FFFFFF", flex: 1 },
   footer: { height: 20 },

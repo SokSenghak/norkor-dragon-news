@@ -20,8 +20,6 @@ import GlobalService from "../../services/global-service";
 import NkdNewsService from "../../services/nkdNewsService";
 import AutoMarqueeRepeat from "@/components/AutoMarqueeRepeat";
 
-const { width } = Dimensions.get("window");
-
 interface Post {
   guid: any;
   id: number;
@@ -44,7 +42,6 @@ export default function PostDetailScreen() {
   const scrollViewRef = useRef<ScrollView | null>(null);
   const [fullList, setFullList] = useState<string[]>([]);
   const [featuredImage, setFeaturedImage] = useState<string | null>(null);
-  const [webViewHeight, setWebViewHeight] = useState(0);
 
   const categories = [
     { title: 'ព័ត៌មានជាតិ', url: '/list/66', id: "66" },
@@ -58,6 +55,36 @@ export default function PostDetailScreen() {
     { title: 'ទំនាក់ទំនងផ្សាយពាណិជ្ជកម្ម', url: '/page/7427', id: "7427" },
     { title: 'អំពី យើង (នគរ ដ្រេហ្គន)', url: '/page/412314', id: "412314" }
   ];
+
+  const [safeUrl, setSafeUrl] = useState("");
+
+  const screenHeight = Dimensions.get("window").height;
+
+  
+  const getDataDetail = async (id: string) => {
+    try {
+      if (!id) return;
+
+      const safe = `http://nkdnews.com/archives/${id}?viewapp=1`;
+
+      setSafeUrl(safe);
+
+      const res = await fetch(
+        `http://nkdnews.com/wp-json/wp/v2/posts/${id}`
+      );
+
+    } catch (error) {
+      console.log("Detail fetch error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (id) {
+      getDataDetail(id);
+    }
+  }, [id]);
 
   const normalizedCategories = categories.map(cat => ({
     ...cat,
@@ -177,42 +204,6 @@ export default function PostDetailScreen() {
     );
   }
 
-  const htmlContent = `
-<html>
-  <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-      body { margin: 0; padding: 10px; font-family: Arial; color: #333; }
-      img { max-width: 100%; height: auto; margin: 10px 0; border-radius: 8px; }
-      iframe { width: 100%; height: 220px; border-radius: 8px; }
-    </style>
-  </head>
-  <body>
-    ${post.content.rendered}
-    <script>
-      function sendHeight() {
-        const height = document.body.scrollHeight;
-        window.ReactNativeWebView.postMessage(height);
-      }
-
-      // Initial height after load
-      window.onload = function() {
-        sendHeight();
-
-        // Update height when images finish loading
-        const imgs = document.images;
-        for (let i = 0; i < imgs.length; i++) {
-          imgs[i].onload = sendHeight;
-        }
-      }
-
-      window.addEventListener('resize', sendHeight);
-    </script>
-  </body>
-</html>
-`;
-
-
   return (
     <View style={styles.container}>
       <View style={styles.headerButtons}>
@@ -228,10 +219,10 @@ export default function PostDetailScreen() {
       </View>
 
       <View style={styles.marqueeContainerAds}>
-        <AutoMarqueeRepeat
-          text="នគរដ្រេហ្គន ព័ត៌មានជាតិ-អន្តរជាតិ"
+         <AutoMarqueeRepeat
+          text="នគរដ្រេហ្គន​ ព័ត៌មានជាតិ-អន្តរជាតិទាន់ហេតុការណ៍ សម្បូរបែប ប្រកបដោយក្រមសីលធម៌ និងវិជ្ជាជីវៈដោយផ្ទាល់"
           speed={40}
-          textStyle={{ fontSize: 14, color: "#fff" }}
+          textStyle={{ fontFamily: "KhmerOS", fontSize: 14, color: "#e0dcdcff" }}
           containerStyle={{ backgroundColor: "#2B4A7C", paddingVertical: 6 }}
         />
 
@@ -240,19 +231,20 @@ export default function PostDetailScreen() {
           horizontal
           showsHorizontalScrollIndicator={false}
           scrollEnabled={false}
+          contentContainerStyle={{ alignItems: "center" }}
         >
           {fullList.map((uri, index) => (
-            <Image
-              key={index}
-              source={{ uri }}
-              style={{ width: 190, height: 80, borderRadius: 10, marginRight: 10 }}
-            />
+            <TouchableOpacity key={index} style={{ marginRight: 10 }}>
+              <Image
+                source={{ uri }}
+                style={{ width: 190, height: 80, borderRadius: 10 }}
+              />
+            </TouchableOpacity>
           ))}
         </ScrollView>
       </View>
 
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        {featuredImage && (
+        {/* {featuredImage && (
           <Image
             source={{ uri: featuredImage }}
             style={{ width: "100%", height: 250 }}
@@ -270,19 +262,22 @@ export default function PostDetailScreen() {
             .replace(/&#8216;/g, "‘")
             .replace(/&#8217;/g, "’")
             .replace(/&amp;/g, "&")}
-        </Text>
+        </Text> */}
 
-        {/* WebView with dynamic height */}
-        <WebView
-          originWhitelist={["*"]}
-          source={{ html: htmlContent }}
-          style={{ width: "100%", height: 5000, backgroundColor: "#FFF" }}
-          javaScriptEnabled
-          domStorageEnabled
-          scrollEnabled={false} 
-        />
-
-      </ScrollView>
+        <View style={{ flex: 1 }}>
+          <WebView
+            source={{ uri: safeUrl }}
+            style={{ height: screenHeight }}
+            injectedJavaScript={`
+              setTimeout(function() {
+                const height = document.body.scrollHeight;
+                window.ReactNativeWebView.postMessage(height);
+              }, 500);
+              true;
+            `}
+            
+          />
+        </View>
     </View>
   );
 }

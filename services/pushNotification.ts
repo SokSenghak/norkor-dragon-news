@@ -48,7 +48,7 @@ export async function initPush() {
     // ✅ Get FCM Token
     const token = await messaging().getToken();
 
-    console.log('🔥 FCM TOKEN:', token);
+    // console.log('🔥 FCM TOKEN:', token);
 
     return token;
 

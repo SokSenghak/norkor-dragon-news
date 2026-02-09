@@ -234,9 +234,13 @@ export default function HomeScreen() {
   return (
     <View style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
+     <View style={styles.header}>
         <Image source={logo} style={styles.logo} contentFit="contain" />
-        <Text style={styles.headerTitle}>ព័ត៌មាន នគរដ្រេហ្គន​</Text>
+        {fontsLoaded ? (
+          <Text style={[styles.headerTitle, { fontFamily: "KhmerOS" }]}>
+            ព័ត៌មាន&nbsp;នគរដ្រេហ្គន​
+          </Text>
+        ) : null}
       </View>
 
       {/* Last Video */}
@@ -325,22 +329,9 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#2B4A7C" },
-  header: {
-    paddingTop: 16,
-    marginTop: 30,
-    backgroundColor: "#2B4A7C",
-    flexDirection: "row",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
+  header: { backgroundColor: "#2B4A7C", flexDirection: "row", alignItems: "center", paddingHorizontal: 16, paddingVertical: 12, gap: 12 , marginTop: 20},
+  headerTitle: {fontFamily: "KhmerOS", fontSize: 14, color: "#FFFFFF",lineHeight: 24, includeFontPadding: true },
   logo: { width: 30, height: 30, borderRadius: 8 },
-  headerTitle: {
-    marginLeft: 10,
-    fontFamily: "KhmerOS",
-    textAlign: "center",
-    fontSize: 14,
-    color: "#e0dcdcff",
-  },
   scrollView: { flex: 1 },
   youtubeContainer: {
     width: width,
