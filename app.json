@@ -26,6 +26,7 @@
       }
     },
     "android": {
+      "versionCode": 39000,
       "sound": true,
       "assets": [
         "./assets/audio/sound.mp3"
@@ -56,7 +57,7 @@
         {
           "android": {
           "compileSdkVersion": 36,
-          "targetSdkVersion": 34,
+          "targetSdkVersion": 35,
             "extraMavenRepos": [
               "../../node_modules/@notifee/react-native/android/libs"
             ]
